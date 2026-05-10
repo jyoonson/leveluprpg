@@ -349,7 +349,11 @@ function App(){
         lastCheckinDate:today,
         streak:isNewDay?(prev.lastCheckinDate===yest?prev.streak+1:1):prev.streak,
         totalDays:isNewDay?prev.totalDays+1:prev.totalDays,
-        log:isNewDay&&!wasChecked?[{date:today,type:"checkin",habits:checkedCount,xp:totalDiff,icon:"✅"}].concat(prev.log.slice(0,99)):prev.log,
+        log:(function(){
+  var newEntry={date:today,type:"checkin",habits:checkedCount,xp:totalDiff,icon:"✅"};
+  var filtered=prev.log.filter(function(e){return!(e.type==="checkin"&&e.date===today);});
+  return [newEntry].concat(filtered.slice(0,99));
+})(),
       });
     });
     if(!todayHabits[hid])spark();
