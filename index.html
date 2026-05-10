@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#0a0f0a"/>
+<title>LevelupRPG — 손지윤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0a0f0a;overflow-x:hidden;}
+input,select,button{font-family:'Noto Sans KR',sans-serif;outline:none;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:#4ade8044;border-radius:2px;}
+@keyframes particleUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-90px)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px #4ade8044}50%{box-shadow:0 0 18px #4ade8077}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect}=React;
+
+const C={
+  su:"#0a0f0a",su2:"#111a11",su3:"#1a2a1a",
+  mok:"#4ade80",mok2:"#22c55e",mok3:"#86efac",
+  to:"#fbbf24",to2:"#fcd34d",
+  geum:"#f0f0f0",geum2:"#888888",geum3:"#555555",
+  hwa:"#ef4444",
+};
+
+const GRADES=["F","D","C","B","A","S","SS","SSS"];
+const GRADE_XP={F:0,D:500,C:1500,B:3000,A:5500,S:9000,SS:14000,SSS:20000};
+const NEXT_XP={F:500,D:1500,C:3000,B:5500,A:9000,S:14000,SS:20000,SSS:99999};
+
+const STATS=[
+  {id:"research",  icon:"⚔️",label:"연구실적", sub:"SSCI·SCIE·KCI",       color:C.mok, startGrade:"D"},
+  {id:"methodology",icon:"🔬",label:"연구역량", sub:"방법론·자격증·빅데이터",color:C.mok3,startGrade:"C"},
+  {id:"external",  icon:"🏛️",label:"대외실적", sub:"산학·해외연계·학회",    color:C.to,  startGrade:"F"},
+  {id:"teaching",  icon:"🎓",label:"티칭",     sub:"강의평가·강의다양성",    color:C.geum,startGrade:"A"},
+  {id:"presence",  icon:"💎",label:"프레젠스", sub:"외모·체력·자신감",       color:C.mok2,startGrade:"C"},
+  {id:"network",   icon:"🤝",label:"네트워크", sub:"인맥·추천서·학회활동",   color:C.to2, startGrade:"D"},
+];
+
+const RESEARCH_TYPES=[
+  {id:"ssci_q1",  label:"SSCI Q1",      icon:"🥇",xp:2000},
+  {id:"ssci_q2",  label:"SSCI Q2",      icon:"🥈",xp:1500},
+  {id:"ssci_q34", label:"SSCI Q3/Q4",   icon:"🥉",xp:1000},
+  {id:"scie",     label:"SCIE",         icon:"📘",xp:800},
+  {id:"scopus",   label:"Scopus",       icon:"📗",xp:500},
+  {id:"kci_a",    label:"KCI 등재",      icon:"📄",xp:300},
+  {id:"kci_b",    label:"KCI 후보",      icon:"📃",xp:150},
+  {id:"proceeding",label:"학술대회",     icon:"🎤",xp:200},
+  {id:"revision", label:"R&R/심사중",    icon:"⏳",xp:100},
+  {id:"working",  label:"Working Paper",icon:"✍️",xp:50},
+];
+
+const PROJECT_STATUS=["구상중","작성중","투고완료","심사중","R&R","게재확정","게재완료"];
+const STATUS_COLOR={
+  "구상중":C.geum3,"작성중":C.to,"투고완료":C.mok3,
+  "심사중":C.to2,"R&R":C.hwa,"게재확정":C.mok,"게재완료":C.mok2,
+};
+
+const DAILY_HABITS=[
+  {id:"wake",    label:"6시 기상",          icon:"🌅",xp:{presence:15}},
+  {id:"fast",    label:"8시 이후 금식",      icon:"🚫",xp:{presence:20}},
+  {id:"water",   label:"물 2L 이상",         icon:"💧",xp:{presence:15}},
+  {id:"sleep",   label:"11시 이전 취침",      icon:"🌙",xp:{presence:15}},
+  {id:"meal",    label:"도시락/식사시간 준수",icon:"🍱",xp:{presence:10}},
+  {id:"paper",   label:"논문 5페이지 읽기",   icon:"📄",xp:{research:30,methodology:10}},
+  {id:"write",   label:"100단어 이상 쓰기",   icon:"✍️",xp:{research:40}},
+  {id:"exercise",label:"운동",               icon:"🏃",xp:{presence:25}},
+];
+
+const EVENTS=[
+  {id:"project",    label:"산학 프로젝트 수주",  icon:"💼",xp:{external:300}},
+  {id:"certificate",label:"자격증 취득",          icon:"📜",xp:{methodology:400}},
+  {id:"grooming",   label:"외모관리(왁싱/피부)",  icon:"💅",xp:{presence:50}},
+  {id:"health",     label:"병원/건강검진",         icon:"🏥",xp:{presence:40}},
+  {id:"application",label:"임용 지원서 제출",      icon:"📋",xp:{research:50,network:50}},
+  {id:"interview",  label:"면접 참가",             icon:"🎯",xp:{network:200,teaching:100}},
+  {id:"collab",     label:"해외 연구자 컨택",      icon:"🌐",xp:{external:150,network:100}},
+  {id:"method",     label:"방법론 스터디",          icon:"📊",xp:{methodology:100}},
+  {id:"overseas",   label:"해외학회 참가",          icon:"✈️",xp:{external:300,network:150}},
+];
+
+const W={current:61.7,z1:57,z2:52,z3:47};
+const TITLES=[
+  {minLevel:1,title:"시간강사"},{minLevel:5,title:"연구자 지망생"},
+  {minLevel:10,title:"각성한 강사"},{minLevel:20,title:"임용 도전자"},
+  {minLevel:30,title:"검증된 연구자"},{minLevel:50,title:"테뉴어 후보"},
+];
+const DEFAULT_PROJECTS=[
+  {id:"dja",title:"DJA 논문",sub:"GenAI × 직업불안 PLS-SEM",journal:"IJPR",status:"투고완료",progress:80,deadline:"2026-06-04",notes:"KORMS 발표본 별도",papers:[]},
+  {id:"dpm",title:"DPM 논문",sub:"디자인 관여도 × NPD성과",journal:"JMTM",status:"R&R",progress:40,deadline:"",notes:"이론적 기여 보강 필요",papers:[]},
+];
+
+const SHEET_URL="https://script.google.com/macros/s/AKfycbyVsN5jT-62obLU945JLKaGYxcLOzfp7DWPmHprPHakCBdD0AKySdgJhZbPiNwqAZ-M2A/exec";
+
+function getTitle(lv){const t=[...TITLES].reverse().find(function(t){return lv>=t.minLevel;});return t?t.title:"시간강사";}
+function gradeFromXP(xp){var g="F";for(var i=0;i<GRADES.length;i++){if(xp>=GRADE_XP[GRADES[i]])g=GRADES[i];}return g;}
+function gradeProgress(xp){var g=gradeFromXP(xp);return Math.min(((xp-GRADE_XP[g])/(NEXT_XP[g]-GRADE_XP[g]))*100,100);}
+function gradeColor(g){return{F:C.hwa,D:C.geum2,C:C.mok3,B:C.mok,A:C.mok2,S:C.to,SS:C.to2,SSS:"#fff"}[g]||C.geum2;}
+function daysUntil(d){if(!d)return null;return Math.ceil((new Date(d)-new Date())/86400000);}
+function todayStr(){return new Date().toISOString().split("T")[0];}
+function initStatXP(){var o={};STATS.forEach(function(s){o[s.id]=GRADE_XP[s.startGrade];});return o;}
+function defaultState(){return{statXP:initStatXP(),totalXP:0,streak:0,totalDays:0,lastCheckinDate:null,log:[],weightLog:[{date:todayStr(),weight:W.current}],researchLog:[],projects:DEFAULT_PROJECTS,settings:{dDayShort:{label:"단기목표",date:"2026-09-01"},dDayLong:{label:"최종목표",date:"2027-03-01"}}};}
+function loadLocal(){try{var r=localStorage.getItem("levelup_v4");if(r)return Object.assign({},defaultState(),JSON.parse(r));}catch(e){}return defaultState();}
+function saveLocal(s){try{localStorage.setItem("levelup_v4",JSON.stringify(s));}catch(e){}}
+
+function Btn(props){
+  return React.createElement("button",{onClick:props.onClick,disabled:props.disabled,style:Object.assign({cursor:props.disabled?"not-allowed":"pointer",fontFamily:"'Noto Sans KR',sans-serif"},props.style)},props.children);
+}
+function Inp(props){
+  return React.createElement("input",{value:props.value,onChange:props.onChange,placeholder:props.placeholder,type:props.type||"text",style:Object.assign({background:C.su2,border:"1px solid "+C.mok+"44",borderRadius:8,padding:"9px 12px",color:C.geum,fontFamily:"'Noto Sans KR',sans-serif",fontSize:"0.88rem",width:"100%",outline:"none"},props.style)});
+}
+
+function App(){
+  const [state,setState]=useState(loadLocal);
+  const [tab,setTab]=useState("main");
+  const [notif,setNotif]=useState(null);
+  const [particles,setParticles]=useState([]);
+  const [syncStatus,setSyncStatus]=useState("idle");
+  const [showCheckin,setShowCheckin]=useState(false);
+  const [checkedHabits,setCheckedHabits]=useState([]);
+  const [showPaper,setShowPaper]=useState(false);
+  const [paperForm,setPaperForm]=useState({type:"",title:"",journal:"",role:"1저자",projectId:""});
+  const [showProject,setShowProject]=useState(false);
+  const [editingPrj,setEditingPrj]=useState(null);
+  const [prjForm,setPrjForm]=useState({title:"",sub:"",journal:"",status:"작성중",progress:0,deadline:"",notes:""});
+  const [weightInput,setWeightInput]=useState("");
+  const [showWeight,setShowWeight]=useState(false);
+  const [settingsForm,setSettingsForm]=useState(null);
+
+  useEffect(function(){saveLocal(state);},[state]);
+
+  useEffect(function(){
+    setSyncStatus("syncing");
+    fetch(SHEET_URL).then(function(r){return r.json();}).then(function(data){
+      if(data&&data.totalXP!==undefined&&data.status!=="empty"){
+        setState(Object.assign({},defaultState(),data));
+      }
+      setSyncStatus("ok");
+    }).catch(function(){setSyncStatus("error");});
+  },[]);
+
+  useEffect(function(){
+    if(syncStatus==="syncing")return;
+    var t=setTimeout(function(){
+      setSyncStatus("syncing");
+      fetch(SHEET_URL,{method:"POST",body:JSON.stringify(state),headers:{"Content-Type":"application/json"}})
+        .then(function(r){return r.json();}).then(function(){setSyncStatus("ok");}).catch(function(){setSyncStatus("error");});
+    },1500);
+    return function(){clearTimeout(t);};
+  },[state]);
+
+  const today=todayStr();
+  const checkedIn=state.lastCheckinDate===today;
+  const level=Math.floor(state.totalXP/200)+1;
+  const wArr=state.weightLog||[];
+  const latestW=wArr.length>0?wArr[wArr.length-1].weight:W.current;
+  const settings=state.settings||{dDayShort:{label:"단기목표",date:"2026-09-01"},dDayLong:{label:"최종목표",date:"2027-03-01"}};
+
+  function notify(msg,color){setNotif({msg:msg,color:color||C.mok});setTimeout(function(){setNotif(null);},3000);}
+  function spark(){
+    setParticles(Array.from({length:10},function(_,i){return{id:Date.now()+i,x:20+Math.random()*60,delay:Math.random()*0.4};},));
+    setTimeout(function(){setParticles([]);},2000);
+  }
+
+  function doCheckin(){
+    if(checkedIn)return;
+    var xp={};
+    checkedHabits.forEach(function(hid){
+      var h=DAILY_HABITS.find(function(x){return x.id===hid;});
+      if(h)Object.entries(h.xp).forEach(function(kv){xp[kv[0]]=(xp[kv[0]]||0)+kv[1];});
+    });
+    var total=Object.values(xp).reduce(function(a,b){return a+b;},0);
+    var perfect=checkedHabits.length===DAILY_HABITS.length;
+    setState(function(prev){
+      var nx=Object.assign({},prev.statXP);
+      Object.entries(xp).forEach(function(kv){nx[kv[0]]=(nx[kv[0]]||0)+kv[1];});
+      var yest=new Date(Date.now()-86400000).toISOString().split("T")[0];
+      return Object.assign({},prev,{statXP:nx,totalXP:prev.totalXP+total,lastCheckinDate:today,
+        streak:prev.lastCheckinDate===yest?prev.streak+1:1,totalDays:prev.totalDays+1,
+        log:[{date:today,type:"checkin",habits:checkedHabits.length,xp:total,icon:"✅"}].concat(prev.log.slice(0,99))});
+    });
+    spark();notify("+"+total+" XP "+(perfect?"✨ 완벽한 하루!":"획득!"),C.mok);
+    setShowCheckin(false);setCheckedHabits([]);
+  }
+
+  function doEvent(ev){
+    var total=Object.values(ev.xp).reduce(function(a,b){return a+b;},0);
+    setState(function(prev){
+      var nx=Object.assign({},prev.statXP);
+      Object.entries(ev.xp).forEach(function(kv){nx[kv[0]]=(nx[kv[0]]||0)+kv[1];});
+      return Object.assign({},prev,{statXP:nx,totalXP:prev.totalXP+total,
+        log:[{date:today,type:"event",label:ev.label,icon:ev.icon,xp:total}].concat(prev.log.slice(0,99))});
+    });
+    spark();notify(ev.icon+" "+ev.label+" +"+total+" XP!",C.to);
+  }
+
+  function submitPaper(){
+    var rt=RESEARCH_TYPES.find(function(r){return r.id===paperForm.type;});
+    if(!rt||!paperForm.title)return;
+    var bonus=paperForm.role==="1저자"?1:paperForm.role==="교신저자"?0.9:0.5;
+    var xp=Math.round(rt.xp*bonus);
+    var entry={id:Date.now(),date:today,typeId:rt.id,typeLabel:rt.label,icon:rt.icon,title:paperForm.title,journal:paperForm.journal,role:paperForm.role,projectId:paperForm.projectId,xp:xp};
+    setState(function(prev){
+      var nx=Object.assign({},prev.statXP,{research:(prev.statXP.research||0)+xp});
+      var nprj=prev.projects.map(function(p){return p.id===paperForm.projectId?Object.assign({},p,{papers:(p.papers||[]).concat([entry])}):p;});
+      return Object.assign({},prev,{statXP:nx,totalXP:prev.totalXP+xp,researchLog:[entry].concat(prev.researchLog||[]),projects:nprj,
+        log:[{date:today,type:"research",label:rt.icon+" "+rt.label,icon:rt.icon,xp:xp}].concat(prev.log.slice(0,99))});
+    });
+    spark();notify(rt.icon+" "+rt.label+" +"+xp+" XP!",C.mok);
+    setShowPaper(false);setPaperForm({type:"",title:"",journal:"",role:"1저자",projectId:""});
+  }
+
+  function savePrj(){
+    if(!prjForm.title)return;
+    setState(function(prev){
+      if(editingPrj){return Object.assign({},prev,{projects:prev.projects.map(function(p){return p.id===editingPrj?Object.assign({},p,prjForm):p;})});}
+      return Object.assign({},prev,{projects:prev.projects.concat([Object.assign({},prjForm,{id:String(Date.now()),papers:[]})])});
+    });
+    notify(editingPrj?"수정 완료":"프로젝트 추가!",C.mok);
+    setShowProject(false);setEditingPrj(null);setPrjForm({title:"",sub:"",journal:"",status:"작성중",progress:0,deadline:"",notes:""});
+  }
+
+  function logWeight(){
+    var w=parseFloat(weightInput);
+    if(isNaN(w)||w<30||w>150)return;
+    setState(function(prev){return Object.assign({},prev,{
+      weightLog:(prev.weightLog||[]).concat([{date:today,weight:w}]).slice(-60),
+      log:[{date:today,type:"weight",weight:w,icon:"⚖️",xp:0}].concat(prev.log.slice(0,99)),
+    });});
+    notify("체중 기록: "+w+"kg",C.mok3);setWeightInput("");setShowWeight(false);
+  }
+
+  function wZone(w){
+    if(w>W.z1)return{label:"과체중",color:C.hwa,emoji:"🔴"};
+    if(w>W.z2)return{label:"주의",color:C.to,emoji:"🟡"};
+    if(w>W.z3)return{label:"정상",color:C.mok3,emoji:"🟢"};
+    return{label:"이상",color:C.mok,emoji:"⭐"};
+  }
+  var zone=wZone(latestW);
+  var dds=daysUntil(settings.dDayShort.date);
+  var ddl=daysUntil(settings.dDayLong.date);
+
+  var TABS=[
+    {id:"main",icon:"📊",label:"스탯"},
+    {id:"research",icon:"📚",label:"연구"},
+    {id:"events",icon:"📌",label:"실적"},
+    {id:"body",icon:"💎",label:"체중"},
+    {id:"settings",icon:"⚙️",label:"설정"},
+    {id:"log",icon:"📋",label:"로그"},
+  ];
+
+  var S={
+    root:{minHeight:"100vh",background:C.su,fontFamily:"'Noto Sans KR',sans-serif",color:C.geum,position:"relative",overflowX:"hidden"},
+    bg:{position:"fixed",inset:0,background:"radial-gradient(ellipse at 25% 0%,"+C.mok+"09,"+C.su+" 55%)",zIndex:0},
+    grid:{position:"fixed",inset:0,zIndex:0,backgroundImage:"linear-gradient("+C.mok+"09 1px,transparent 1px),linear-gradient(90deg,"+C.mok+"09 1px,transparent 1px)",backgroundSize:"36px 36px"},
+    wrap:{position:"relative",zIndex:1,maxWidth:600,margin:"0 auto",padding:"18px 14px 100px"},
+    header:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16,borderBottom:"1px solid "+C.mok+"1a",paddingBottom:14},
+    name:{fontFamily:"'Share Tech Mono',monospace",fontSize:"1.4rem",fontWeight:900,color:C.geum,letterSpacing:2},
+    lv:{fontFamily:"'Share Tech Mono',monospace",background:"linear-gradient(135deg,"+C.mok2+","+C.mok3+")",color:C.su,padding:"3px 12px",borderRadius:20,fontSize:"0.85rem",fontWeight:900,animation:"glow 2.5s infinite"},
+    ddRow:{display:"flex",gap:7,marginBottom:16},
+    ddBox:{flex:1,background:C.su2,border:"1px solid "+C.mok+"1a",borderRadius:10,padding:"9px 6px",display:"flex",flexDirection:"column",alignItems:"center",gap:2},
+    tabs:{display:"flex",gap:3,marginBottom:16},
+    tab:{flex:1,padding:"7px 2px",background:C.su2,border:"1px solid "+C.mok+"1a",borderRadius:8,color:C.geum3,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2},
+    tabOn:{background:C.mok+"1a",borderColor:C.mok,color:C.mok},
+    card:{background:C.su2,border:"1px solid",borderRadius:12,padding:14},
+    bar:{height:5,background:"#ffffff10",borderRadius:3,overflow:"hidden"},
+    fill:{height:"100%",borderRadius:3,transition:"width 0.6s ease"},
+    grade:{fontFamily:"'Share Tech Mono',monospace",fontWeight:900,fontSize:"1.15rem",border:"2px solid",borderRadius:7,padding:"2px 9px"},
+    logRow:{display:"flex",gap:8,alignItems:"center",padding:"8px 0",borderBottom:"1px solid "+C.mok+"0d"},
+    logDate:{color:C.geum3,minWidth:80,fontFamily:"'Share Tech Mono',monospace",fontSize:"0.65rem"},
+    outline:{background:"transparent",border:"1px solid "+C.mok+"77",borderRadius:10,padding:11,color:C.mok,fontSize:"0.88rem",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:6,width:"100%"},
+    solid:{width:"100%",padding:13,background:"linear-gradient(135deg,"+C.mok2+","+C.mok+")",border:"none",borderRadius:12,color:C.su,fontWeight:900,fontSize:"0.95rem"},
+    evBtn:{display:"flex",alignItems:"center",gap:10,background:C.su2,border:"1px solid "+C.mok+"1a",borderRadius:10,padding:"11px 13px",color:C.geum,width:"100%",marginBottom:8},
+    fixBtn:{position:"fixed",bottom:22,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,"+C.mok2+","+C.mok3+")",border:"none",borderRadius:30,padding:"14px 42px",color:C.su,fontWeight:900,fontSize:"0.92rem",cursor:"pointer",boxShadow:"0 0 22px "+C.mok+"44",zIndex:50,whiteSpace:"nowrap"},
+    overlay:{position:"fixed",inset:0,background:"#000000e0",zIndex:150,display:"flex",alignItems:"flex-end"},
+    modal:{width:"100%",maxWidth:600,margin:"0 auto",background:C.su2,borderRadius:"20px 20px 0 0",padding:"22px 18px 38px",border:"1px solid "+C.mok+"2a",maxHeight:"88vh",overflowY:"auto"},
+    mTitle:{fontFamily:"'Share Tech Mono',monospace",fontWeight:900,fontSize:"1rem",color:C.mok,marginBottom:14,textAlign:"center"},
+    hItem:{display:"flex",alignItems:"center",gap:10,padding:"10px 13px",borderRadius:10,border:"1px solid",cursor:"pointer",marginBottom:6},
+    sBadge:{fontSize:"0.68rem",fontWeight:700,padding:"2px 8px",borderRadius:5,border:"1px solid"},
+    mTag:{fontSize:"0.68rem",color:C.geum2,background:C.su3,padding:"2px 7px",borderRadius:4},
+    sRow:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:"1px solid "+C.mok+"11",fontSize:"0.82rem"},
+  };
+
+  return (
+    <div style={S.root}>
+      <div style={S.bg}/><div style={S.grid}/>
+      {particles.map(function(p){return <div key={p.id} style={{position:"fixed",bottom:"30%",left:p.x+"%",width:7,height:7,borderRadius:"50%",background:C.mok,animation:"particleUp 1.4s ease-out forwards",animationDelay:p.delay+"s",zIndex:100}}/> ;})}
+      {notif&&<div style={{position:"fixed",top:14,left:"50%",transform:"translateX(-50%)",background:C.su2,border:"1px solid "+notif.color,padding:"9px 20px",borderRadius:8,fontWeight:700,zIndex:200,animation:"fadeIn 0.3s ease",fontFamily:"'Share Tech Mono',monospace",fontSize:"0.82rem",whiteSpace:"nowrap",color:notif.color}}>{notif.msg}</div>}
+
+      <div style={S.wrap}>
+        {/* 헤더 */}
+        <div style={S.header}>
+          <div>
+            <div style={S.name}>손지윤</div>
+            <div style={{color:C.mok,fontSize:"0.75rem",marginTop:2}}>{getTitle(level)}</div>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
+            <div style={S.lv}>Lv.{level}</div>
+            <div style={{fontSize:"0.75rem",color:C.to}}>🔥 {state.streak}일 연속</div>
+            <div style={{fontSize:"0.6rem",color:syncStatus==="ok"?C.mok:syncStatus==="syncing"?C.to:C.hwa}}>
+              {syncStatus==="ok"?"☁️ 동기화됨":syncStatus==="syncing"?"⏳ 동기화중...":"⚠️ 오프라인"}
+            </div>
+          </div>
+        </div>
+
+        {/* D-Day */}
+        <div style={S.ddRow}>
+          {[
+            {label:settings.dDayShort.label,val:"-"+dds,color:C.to,sub:settings.dDayShort.date},
+            {label:settings.dDayLong.label, val:"-"+ddl,color:C.hwa,sub:settings.dDayLong.date},
+            {label:"누적 XP",val:state.totalXP.toLocaleString(),color:C.mok,sub:state.totalDays+"일"},
+          ].map(function(d){return(
+            <div key={d.label} style={S.ddBox}>
+              <span style={{fontSize:"0.58rem",color:C.geum3,fontFamily:"'Share Tech Mono',monospace"}}>{d.label}</span>
+              <span style={{fontFamily:"'Share Tech Mono',monospace",fontWeight:900,fontSize:d.label==="누적 XP"?"0.9rem":"1.15rem",color:d.color}}>{d.val}</span>
+              <span style={{fontSize:"0.55rem",color:C.geum3}}>{d.sub}</span>
+            </div>
+          );})}
+        </div>
+
+        {/* 탭 */}
+        <div style={S.tabs}>
+          {TABS.map(function(t){return(
+            <button key={t.id} style={Object.assign({},S.tab,tab===t.id?S.tabOn:{})} onClick={function(){setTab(t.id);}}>
+              <span style={{fontSize:"0.85rem"}}>{t.icon}</span>
+              <span style={{fontSize:"0.6rem"}}>{t.label}</span>
+            </button>
+          );})}
+        </div>
+
+        {/* 스탯 */}
+        {tab==="main"&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {STATS.map(function(stat){
+            var xp=state.statXP[stat.id]||0,g=gradeFromXP(xp),pct=gradeProgress(xp),gc=gradeColor(g);
+            return(
+              <div key={stat.id} style={Object.assign({},S.card,{borderColor:stat.color+"44"})}>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                  <span style={{fontSize:"1.3rem"}}>{stat.icon}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:700,fontSize:"0.92rem",color:C.geum}}>{stat.label}</div>
+                    <div style={{fontSize:"0.65rem",color:C.geum3,marginTop:1}}>{stat.sub}</div>
+                  </div>
+                  <div style={Object.assign({},S.grade,{color:gc,borderColor:gc})}>{g}</div>
+                </div>
+                <div style={S.bar}><div style={Object.assign({},S.fill,{width:pct+"%",background:"linear-gradient(90deg,"+stat.color+"77,"+stat.color+")"})}/></div>
+                <div style={{fontSize:"0.6rem",color:C.geum3,marginTop:4,fontFamily:"monospace"}}>{xp.toLocaleString()} / {NEXT_XP[g].toLocaleString()} XP</div>
+              </div>
+            );
+          })}
+        </div>}
+
+        {/* 연구 */}
+        {tab==="research"&&<div>
+          <Btn onClick={function(){setEditingPrj(null);setPrjForm({title:"",sub:"",journal:"",status:"작성중",progress:0,deadline:"",notes:""});setShowProject(true);}} style={Object.assign({},S.outline,{marginBottom:8})}>+ 새 연구 프로젝트</Btn>
+          <Btn onClick={function(){setShowPaper(true);}} style={Object.assign({},S.outline,{borderColor:C.to+"88",color:C.to,marginBottom:16})}>+ 논문/실적 등록</Btn>
+
+          {(state.projects||[]).map(function(p){
+            var dd=daysUntil(p.deadline),sc=STATUS_COLOR[p.status]||C.geum2,pc=(p.papers||[]).length;
+            return(
+              <div key={p.id} style={Object.assign({},S.card,{borderColor:sc+"44",marginBottom:12})}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:700,color:C.geum,fontSize:"0.95rem"}}>{p.title}</div>
+                    {p.sub&&<div style={{fontSize:"0.68rem",color:C.geum3,marginTop:1}}>{p.sub}</div>}
+                  </div>
+                  <div style={Object.assign({},S.sBadge,{background:sc+"22",color:sc,borderColor:sc+"66"})}>{p.status}</div>
+                </div>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:10}}>
+                  {p.journal&&<span style={S.mTag}>🎯 {p.journal}</span>}
+                  {dd!==null&&<span style={Object.assign({},S.mTag,{color:dd<7?C.hwa:dd<30?C.to:C.geum2})}>{dd>=0?"D-"+dd:"기한초과"}</span>}
+                  {pc>0&&<span style={Object.assign({},S.mTag,{color:C.mok})}>📄 {pc}편</span>}
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                  <div style={Object.assign({},S.bar,{flex:1})}><div style={Object.assign({},S.fill,{width:(p.progress||0)+"%",background:"linear-gradient(90deg,"+sc+"77,"+sc+")"})}/></div>
+                  <span style={{fontSize:"0.72rem",color:sc,fontFamily:"monospace",minWidth:32}}>{p.progress||0}%</span>
+                </div>
+                {p.notes&&<div style={{fontSize:"0.68rem",color:C.geum3,marginBottom:8,fontStyle:"italic"}}>💬 {p.notes}</div>}
+                <div style={{display:"flex",gap:6,marginTop:8}}>
+                  <Btn onClick={function(){setEditingPrj(p.id);setPrjForm({title:p.title,sub:p.sub||"",journal:p.journal||"",status:p.status||"작성중",progress:p.progress||0,deadline:p.deadline||"",notes:p.notes||""});setShowProject(true);}} style={{flex:1,padding:"6px 0",background:"transparent",border:"1px solid "+C.mok+"55",borderRadius:7,fontSize:"0.75rem",color:C.mok}}>편집</Btn>
+                  <Btn onClick={function(){setState(function(prev){return Object.assign({},prev,{projects:prev.projects.filter(function(x){return x.id!==p.id;})});});notify("삭제",C.hwa);}} style={{padding:"6px 12px",background:"transparent",border:"1px solid "+C.hwa+"55",borderRadius:7,fontSize:"0.75rem",color:C.hwa}}>삭제</Btn>
+                </div>
+              </div>
+            );
+          })}
+
+          {(state.researchLog||[]).length>0&&<div>
+            <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",margin:"12px 0 8px"}}>📋 전체 논문 목록</div>
+            {(state.researchLog||[]).map(function(r,i){return(
+              <div key={i} style={S.logRow}>
+                <span>{r.icon}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:"0.8rem",color:C.geum}}>{r.title}</div>
+                  <div style={{fontSize:"0.65rem",color:C.geum3}}>{r.typeLabel} · {r.role} · {r.date}</div>
+                </div>
+                <span style={{fontSize:"0.7rem",color:C.mok,fontFamily:"monospace"}}>+{r.xp}</span>
+              </div>
+            );})}
+          </div>}
+        </div>}
+
+        {/* 실적 */}
+        {tab==="events"&&<div>
+          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>📌 이벤트 실적 입력</div>
+          {EVENTS.map(function(ev){return(
+            <Btn key={ev.id} onClick={function(){doEvent(ev);}} style={S.evBtn}>
+              <span style={{fontSize:"1.1rem"}}>{ev.icon}</span>
+              <span style={{flex:1,textAlign:"left",fontSize:"0.88rem"}}>{ev.label}</span>
+              <span style={{color:C.to,fontFamily:"monospace",fontSize:"0.72rem"}}>+{Object.values(ev.xp).reduce(function(a,b){return a+b;},0)} XP</span>
+            </Btn>
+          );})}
+        </div>}
+
+        {/* 체중 */}
+        {tab==="body"&&<div>
+          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>💎 체중 관리 — 167cm</div>
+          <div style={Object.assign({},S.card,{borderColor:zone.color+"66",marginBottom:12})}>
+            <div style={{display:"flex",alignItems:"center",gap:14}}>
+              <span style={{fontSize:"2.2rem"}}>{zone.emoji}</span>
+              <div>
+                <div style={{fontFamily:"monospace",fontSize:"1.8rem",color:zone.color,fontWeight:900,lineHeight:1}}>{latestW}kg</div>
+                <div style={{color:zone.color,fontSize:"0.78rem",marginTop:3}}>{zone.label} 구간</div>
+              </div>
+            </div>
+          </div>
+          {[
+            {label:"1단계 과체중 해제",formula:"167-110",target:W.z1,color:C.to},
+            {label:"2단계 정상 체중",  formula:"167-115",target:W.z2,color:C.mok3},
+            {label:"3단계 이상(멋짐)", formula:"167-120",target:W.z3,color:C.mok},
+          ].map(function(st){
+            var done=latestW<=st.target;
+            var pct=done?100:Math.max(0,((W.current-latestW)/(W.current-st.target))*100);
+            return(
+              <div key={st.label} style={Object.assign({},S.card,{borderColor:st.color+(done?"":"33"),marginBottom:8})}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:7}}>
+                  <div>
+                    <div style={{fontSize:"0.82rem",fontWeight:700,color:st.color}}>{st.label}</div>
+                    <div style={{fontSize:"0.65rem",color:C.geum3,fontFamily:"monospace"}}>{st.formula} = {st.target}kg</div>
+                  </div>
+                  <div style={{fontFamily:"monospace",fontWeight:900,color:done?st.color:C.geum2}}>{done?"✅ 달성":"-"+(latestW-st.target).toFixed(1)+"kg"}</div>
+                </div>
+                <div style={S.bar}><div style={Object.assign({},S.fill,{width:pct+"%",background:st.color})}/></div>
+              </div>
+            );
+          })}
+          {showWeight?(
+            <div style={{display:"flex",gap:8,marginTop:10}}>
+              <Inp value={weightInput} onChange={function(e){setWeightInput(e.target.value);}} placeholder="오늘 체중 (kg)" type="number" style={{flex:1}}/>
+              <Btn onClick={logWeight} style={Object.assign({},S.solid,{padding:"9px 14px",width:"auto"})}>기록</Btn>
+              <Btn onClick={function(){setShowWeight(false);}} style={{padding:"9px 14px",background:"#333",border:"none",borderRadius:8,color:C.geum,cursor:"pointer"}}>취소</Btn>
+            </div>
+          ):(
+            <Btn onClick={function(){setShowWeight(true);}} style={Object.assign({},S.outline,{marginTop:10})}>+ 오늘 체중 기록</Btn>
+          )}
+          {wArr.length>1&&<div style={{marginTop:12}}>
+            <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:8}}>최근 기록</div>
+            {wArr.slice().reverse().slice(0,7).map(function(w,i,arr){
+              var prev=arr[i+1],diff=prev?(w.weight-prev.weight).toFixed(1):null;
+              return(
+                <div key={i} style={S.logRow}>
+                  <span style={S.logDate}>{w.date}</span>
+                  <span style={{color:C.geum}}>{w.weight}kg</span>
+                  {diff!==null&&<span style={{color:parseFloat(diff)<0?C.mok:C.hwa,fontSize:"0.75rem"}}>{parseFloat(diff)>0?"+":""}{diff}kg</span>}
+                </div>
+              );
+            })}
+          </div>}
+        </div>}
+
+        {/* 설정 */}
+        {tab==="settings"&&<div>
+          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>⚙️ D-Day 설정</div>
+          {!settingsForm?(
+            <div>
+              <div style={S.card}>
+                <div style={S.sRow}><span style={{color:C.geum2}}>{settings.dDayShort.label}</span><span style={{color:C.to,fontFamily:"monospace"}}>{settings.dDayShort.date} (D-{dds})</span></div>
+                <div style={S.sRow}><span style={{color:C.geum2}}>{settings.dDayLong.label}</span><span style={{color:C.hwa,fontFamily:"monospace"}}>{settings.dDayLong.date} (D-{ddl})</span></div>
+              </div>
+              <Btn onClick={function(){setSettingsForm(JSON.parse(JSON.stringify(settings)));}} style={Object.assign({},S.outline,{marginTop:8})}>✏️ D-Day 수정</Btn>
+            </div>
+          ):(
+            <div style={S.card}>
+              {[
+                {lbl:"단기목표 이름",k:"short",f:"label"},{lbl:"단기목표 날짜",k:"short",f:"date",type:"date"},
+                {lbl:"최종목표 이름",k:"long",f:"label"},{lbl:"최종목표 날짜",k:"long",f:"date",type:"date"},
+              ].map(function(field){return(
+                <div key={field.lbl} style={{marginBottom:12}}>
+                  <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{field.lbl}</div>
+                  <Inp type={field.type||"text"}
+                    value={field.k==="short"?settingsForm.dDayShort[field.f]:settingsForm.dDayLong[field.f]}
+                    onChange={function(e){
+                      var v=e.target.value;
+                      setSettingsForm(function(prev){
+                        var copy=JSON.parse(JSON.stringify(prev));
+                        if(field.k==="short")copy.dDayShort[field.f]=v;
+                        else copy.dDayLong[field.f]=v;
+                        return copy;
+                      });
+                    }}/>
+                </div>
+              );})}
+              <div style={{display:"flex",gap:8}}>
+                <Btn onClick={function(){setState(function(prev){return Object.assign({},prev,{settings:settingsForm});});notify("설정 저장!",C.mok);setSettingsForm(null);}} style={Object.assign({},S.solid,{flex:1})}>저장</Btn>
+                <Btn onClick={function(){setSettingsForm(null);}} style={{flex:1,padding:13,background:"#333",border:"none",borderRadius:12,color:C.geum,cursor:"pointer"}}>취소</Btn>
+              </div>
+            </div>
+          )}
+
+          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",margin:"16px 0 10px"}}>📊 스탯 현황</div>
+          {STATS.map(function(s){
+            var xp=state.statXP[s.id]||0,g=gradeFromXP(xp);
+            return(
+              <div key={s.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:"1px solid "+C.mok+"11"}}>
+                <span>{s.icon}</span>
+                <span style={{flex:1,fontSize:"0.85rem"}}>{s.label}</span>
+                <span style={{fontFamily:"monospace",color:gradeColor(g),fontWeight:700}}>{g}</span>
+                <span style={{fontSize:"0.7rem",color:C.geum3,fontFamily:"monospace"}}>{xp.toLocaleString()} XP</span>
+              </div>
+            );
+          })}
+
+          <div style={{marginTop:16}}>
+            <Btn onClick={function(){if(window.confirm("정말 초기화?)){localStorage.removeItem("levelup_v4");window.location.reload();}}} style={{width:"100%",padding:13,background:C.hwa+"22",border:"1px solid "+C.hwa+"44",borderRadius:12,color:C.hwa,cursor:"pointer",fontSize:"0.9rem"}}>전체 초기화</Btn>
+          </div>
+        </div>}
+
+        {/* 로그 */}
+        {tab==="log"&&<div>
+          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>📋 활동 로그</div>
+          {state.log.length===0&&<div style={{color:C.geum3,textAlign:"center",marginTop:30}}>아직 기록 없음</div>}
+          {state.log.map(function(e,i){return(
+            <div key={i} style={S.logRow}>
+              <span style={S.logDate}>{e.date}</span>
+              <span style={{flex:1,color:C.geum,fontSize:"0.8rem"}}>
+                {e.type==="checkin"?"✅ 체크인 ("+e.habits+"개 습관)":e.type==="weight"?"⚖️ 체중 "+e.weight+"kg":(e.icon||"")+" "+(e.label||"")}
+              </span>
+              {e.xp>0&&<span style={{color:C.mok,fontFamily:"monospace",fontSize:"0.7rem"}}>+{e.xp} XP</span>}
+            </div>
+          );})}
+        </div>}
+
+        <div style={{height:100}}/>
+      </div>
+
+      {/* 체크인 버튼 */}
+      <button onClick={function(){if(!checkedIn)setShowCheckin(true);}} style={Object.assign({},S.fixBtn,{opacity:checkedIn?0.5:1})}>
+        {checkedIn?"✅ 오늘 체크인 완료":"⚡ 오늘의 각성 체크인"}
+      </button>
+
+      {/* 체크인 모달 */}
+      {showCheckin&&<div style={S.overlay} onClick={function(){setShowCheckin(false);}}>
+        <div style={S.modal} onClick={function(e){e.stopPropagation();}}>
+          <div style={S.mTitle}>⚡ 오늘의 각성 체크인</div>
+          {DAILY_HABITS.map(function(h){
+            var on=checkedHabits.indexOf(h.id)>=0;
+            return(
+              <div key={h.id} style={Object.assign({},S.hItem,{background:on?C.mok+"18":"transparent",borderColor:on?C.mok:"#2a3a2a"})}
+                onClick={function(){setCheckedHabits(function(p){return on?p.filter(function(x){return x!==h.id;}):[].concat(p,[h.id]);});}}>
+                <span>{h.icon}</span>
+                <span style={{flex:1,color:C.geum,fontSize:"0.88rem"}}>{h.label}</span>
+                <span>{on?"✅":"⬜"}</span>
+              </div>
+            );
+          })}
+          <div style={{textAlign:"center",color:C.mok,fontWeight:700,margin:"12px 0 8px",fontFamily:"monospace"}}>
+            예상 XP: +{checkedHabits.reduce(function(acc,hid){var h=DAILY_HABITS.find(function(x){return x.id===hid;});return acc+(h?Object.values(h.xp).reduce(function(a,b){return a+b;},0):0);},0)}
+          </div>
+          <Btn onClick={doCheckin} style={S.solid}>각성 확인</Btn>
+        </div>
+      </div>}
+
+      {/* 논문 모달 */}
+      {showPaper&&<div style={S.overlay} onClick={function(){setShowPaper(false);}}>
+        <div style={S.modal} onClick={function(e){e.stopPropagation();}}>
+          <div style={S.mTitle}>⚔️ 논문/연구 실적 등록</div>
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>구분</div>
+            <div style={{maxHeight:200,overflowY:"auto",display:"flex",flexDirection:"column",gap:5}}>
+              {RESEARCH_TYPES.map(function(rt){
+                var on=paperForm.type===rt.id;
+                return(
+                  <div key={rt.id} style={Object.assign({},S.hItem,{background:on?C.mok+"18":"transparent",borderColor:on?C.mok:"#2a3a2a"})}
+                    onClick={function(){setPaperForm(function(p){return Object.assign({},p,{type:rt.id});});}}>
+                    <span>{rt.icon}</span>
+                    <span style={{flex:1,color:C.geum,fontSize:"0.82rem"}}>{rt.label}</span>
+                    <span style={{color:rt.xp>=1000?C.to:C.mok,fontSize:"0.7rem",fontFamily:"monospace"}}>+{rt.xp}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div style={{marginBottom:10}}>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>논문 제목</div>
+            <Inp value={paperForm.title} onChange={function(e){setPaperForm(function(p){return Object.assign({},p,{title:e.target.value});});}} placeholder="제목"/>
+          </div>
+          <div style={{marginBottom:10}}>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>저널명</div>
+            <Inp value={paperForm.journal} onChange={function(e){setPaperForm(function(p){return Object.assign({},p,{journal:e.target.value});});}} placeholder="저널/학회명"/>
+          </div>
+          <div style={{marginBottom:10}}>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>연결 프로젝트</div>
+            <select value={paperForm.projectId} onChange={function(e){setPaperForm(function(p){return Object.assign({},p,{projectId:e.target.value});});}}
+              style={{width:"100%",background:C.su2,border:"1px solid "+C.mok+"44",borderRadius:8,padding:"9px 12px",color:C.geum,fontSize:"0.88rem"}}>
+              <option value="">선택 안함</option>
+              {(state.projects||[]).map(function(p){return <option key={p.id} value={p.id}>{p.title}</option>;})}
+            </select>
+          </div>
+          <div style={{marginBottom:14}}>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>저자 역할</div>
+            <div style={{display:"flex",gap:6}}>
+              {["1저자","교신저자","공동저자"].map(function(r){
+                var on=paperForm.role===r;
+                return <Btn key={r} onClick={function(){setPaperForm(function(p){return Object.assign({},p,{role:r});});}}
+                  style={{flex:1,padding:"8px 0",fontSize:"0.8rem",border:"1px solid "+(on?C.mok:"#2a3a2a"),background:on?C.mok+"22":"transparent",color:on?C.mok:C.geum2,borderRadius:8}}>{r}</Btn>;
+              })}
+            </div>
+            <div style={{fontSize:"0.65rem",color:C.geum3,marginTop:4}}>1저자 100% · 교신저자 90% · 공동저자 50%</div>
+          </div>
+          <Btn onClick={submitPaper} style={Object.assign({},S.solid,{opacity:paperForm.type&&paperForm.title?1:0.4})}>등록</Btn>
+        </div>
+      </div>}
+
+      {/* 프로젝트 모달 */}
+      {showProject&&<div style={S.overlay} onClick={function(){setShowProject(false);}}>
+        <div style={S.modal} onClick={function(e){e.stopPropagation();}}>
+          <div style={S.mTitle}>{editingPrj?"✏️ 프로젝트 편집":"📚 새 연구 프로젝트"}</div>
+          {[
+            {lbl:"프로젝트 제목",key:"title",ph:"예: DJA 논문"},
+            {lbl:"부제/설명",key:"sub",ph:"예: GenAI × 직업불안"},
+            {lbl:"목표 저널",key:"journal",ph:"예: IJPR"},
+          ].map(function(f){return(
+            <div key={f.key} style={{marginBottom:10}}>
+              <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{f.lbl}</div>
+              <Inp value={prjForm[f.key]} onChange={function(e){var v=e.target.value;setPrjForm(function(p){var n=Object.assign({},p);n[f.key]=v;return n;});}} placeholder={f.ph}/>
+            </div>
+          );})}
+          <div style={{marginBottom:10}}>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>상태</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+              {PROJECT_STATUS.map(function(s){
+                var on=prjForm.status===s,sc=STATUS_COLOR[s]||C.geum2;
+                return <Btn key={s} onClick={function(){setPrjForm(function(p){return Object.assign({},p,{status:s});});}}
+                  style={{padding:"5px 10px",fontSize:"0.75rem",border:"1px solid "+(on?sc:"#2a3a2a"),background:on?sc+"22":"transparent",color:on?sc:C.geum2,borderRadius:6}}>{s}</Btn>;
+              })}
+            </div>
+          </div>
+          <div style={{marginBottom:10}}>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>진척도 ({prjForm.progress}%)</div>
+            <input type="range" min="0" max="100" value={prjForm.progress}
+              onChange={function(e){var v=parseInt(e.target.value);setPrjForm(function(p){return Object.assign({},p,{progress:v});});}}
+              style={{width:"100%",accentColor:C.mok}}/>
+          </div>
+          <div style={{marginBottom:10}}>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>마감일</div>
+            <Inp type="date" value={prjForm.deadline} onChange={function(e){var v=e.target.value;setPrjForm(function(p){return Object.assign({},p,{deadline:v});});}}/>
+          </div>
+          <div style={{marginBottom:14}}>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>메모</div>
+            <Inp value={prjForm.notes} onChange={function(e){var v=e.target.value;setPrjForm(function(p){return Object.assign({},p,{notes:v});});}} placeholder="메모"/>
+          </div>
+          <Btn onClick={savePrj} style={Object.assign({},S.solid,{opacity:prjForm.title?1:0.4})}>{editingPrj?"수정 완료":"추가"}</Btn>
+        </div>
+      </div>}
+    </div>
+  );
+}
+
+const root=ReactDOM.createRoot(document.getElementById("root"));
+root.render(React.createElement(App));
+</script>
+</body>
+</html>
