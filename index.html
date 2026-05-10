@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0a0f0a"/>
@@ -43,63 +44,191 @@ const GRADES=["F","D","C","B","A","S","SS","SSS"];
 const GRADE_XP={F:0,D:500,C:1500,B:3000,A:5500,S:9000,SS:14000,SSS:20000};
 const NEXT_XP={F:500,D:1500,C:3000,B:5500,A:9000,S:14000,SS:20000,SSS:99999};
 
+// 언어팩
+const LANG={
+  ko:{
+    name:"손지윤",
+    tabs:["스탯","연구","실적","체중","설정","로그"],
+    checkinBtn:"오늘의 각성 체크인",
+    checkinTitle:"⚡ 오늘의 각성 체크인",
+    checkinSub:"항목별로 언제든 체크/해제 가능!",
+    checkinClose:"닫기",
+    checkinDone:"개 완료",
+    streak:"일 연속",
+    sync:{ok:"☁️ 동기화됨",syncing:"⏳ 동기화중....",error:"⚠️ 오프라인"},
+    totalXP:"누적 XP",
+    totalDays:"일",
+    newProject:"+ 새 연구 프로젝트",
+    newPaper:"+ 논문/실적 등록",
+    edit:"편집",
+    del:"삭제",
+    paperList:"📋 전체 논문 목록",
+    eventsTitle:"📌 이벤트 실적 입력",
+    bodyTitle:"💎 체중 관리 — 167cm",
+    bodyZones:["1단계 과체중 해제","2단계 정상 체중","3단계 이상(멋짐)"],
+    bodyRecord:"+ 오늘 체중 기록",
+    bodyRecent:"최근 기록",
+    bodyBtn:"기록",
+    bodyCancel:"취소",
+    bodyPlaceholder:"오늘 체중 (kg)",
+    achieved:"✅ 달성",
+    settingsTitle:"⚙️ D-Day 설정",
+    settingsEdit:"✏️ D-Day 수정",
+    statsTitle:"📊 스탯 현황",
+    reset:"전체 초기화",
+    resetConfirm:"정말 초기화? 모든 데이터가 삭제돼",
+    logTitle:"📋 활동 로그",
+    logEmpty:"아직 기록 없음",
+    paperTitle:"⚔️ 논문/연구 실적 등록",
+    paperType:"구분",
+    paperName:"논문 제목",
+    paperNamePh:"제목",
+    paperJournal:"저널명",
+    paperJournalPh:"저널/학회명",
+    paperProject:"연결 프로젝트",
+    paperProjectNone:"선택 안함",
+    paperRole:"저자 역할",
+    paperRoles:["1저자","교신저자","공동저자"],
+    paperRoleNote:"1저자 100% · 교신저자 90% · 공동저자 50%",
+    paperSubmit:"등록",
+    prjTitle:"프로젝트 제목",prjTitlePh:"예: DJA 논문",
+    prjSub:"부제/설명",prjSubPh:"예: GenAI × 직업불안",
+    prjJournal:"목표 저널",prjJournalPh:"예: IJPR",
+    prjStatus:"상태",
+    prjProgress:"진척도",
+    prjDeadline:"마감일",
+    prjNotes:"메모",prjNotesPh:"메모",
+    prjSave:"수정 완료",prjAdd:"추가",
+    prjEditTitle:"✏️ 프로젝트 편집",prjNewTitle:"📚 새 연구 프로젝트",
+    dDayShortLabel:"단기목표",dDayLongLabel:"최종목표",
+    settingsSave:"저장",settingsCancel:"취소",
+    wZones:["과체중","주의","정상","이상"],
+    tabLabels:{research:"연구",events:"실적",body:"체중"},
+    titles:["시간강사","연구자 지망생","각성한 강사","임용 도전자","검증된 연구자","테뉴어 후보"],
+    langBtn:"🌐 English",
+  },
+  en:{
+    name:"Jiyoon Son",
+    tabs:["Stats","Research","Events","Weight","Settings","Log"],
+    checkinBtn:"Daily Check-in",
+    checkinTitle:"⚡ Daily Check-in",
+    checkinSub:"Check/uncheck each item anytime!",
+    checkinClose:"Close",
+    checkinDone:" done",
+    streak:" day streak",
+    sync:{ok:"☁️ Synced",syncing:"⏳ Syncing...",error:"⚠️ Offline"},
+    totalXP:"Total XP",
+    totalDays:"days",
+    newProject:"+ New Research Project",
+    newPaper:"+ Add Publication",
+    edit:"Edit",
+    del:"Delete",
+    paperList:"📋 Publication List",
+    eventsTitle:"📌 Event & Achievement Log",
+    bodyTitle:"💎 Weight Management — 167cm",
+    bodyZones:["Stage 1: Exit Overweight","Stage 2: Normal Weight","Stage 3: Goal Weight"],
+    bodyRecord:"+ Log Today's Weight",
+    bodyRecent:"Recent Records",
+    bodyBtn:"Log",
+    bodyCancel:"Cancel",
+    bodyPlaceholder:"Today's weight (kg)",
+    achieved:"✅ Achieved",
+    settingsTitle:"⚙️ D-Day Settings",
+    settingsEdit:"✏️ Edit D-Day",
+    statsTitle:"📊 Stat Overview",
+    reset:"Reset All Data",
+    resetConfirm:"Really reset? All data will be deleted.",
+    logTitle:"📋 Activity Log",
+    logEmpty:"No records yet",
+    paperTitle:"⚔️ Add Publication / Research Output",
+    paperType:"Category",
+    paperName:"Paper Title",
+    paperNamePh:"Title",
+    paperJournal:"Journal Name",
+    paperJournalPh:"Journal / Conference",
+    paperProject:"Linked Project",
+    paperProjectNone:"None",
+    paperRole:"Author Role",
+    paperRoles:["1st Author","Corresponding","Co-author"],
+    paperRoleNote:"1st 100% · Corresponding 90% · Co-author 50%",
+    paperSubmit:"Submit",
+    prjTitle:"Project Title",prjTitlePh:"e.g. DJA Paper",
+    prjSub:"Subtitle",prjSubPh:"e.g. GenAI × Job Insecurity",
+    prjJournal:"Target Journal",prjJournalPh:"e.g. IJPR",
+    prjStatus:"Status",
+    prjProgress:"Progress",
+    prjDeadline:"Deadline",
+    prjNotes:"Notes",prjNotesPh:"Notes",
+    prjSave:"Save Changes",prjAdd:"Add",
+    prjEditTitle:"✏️ Edit Project",prjNewTitle:"📚 New Research Project",
+    dDayShortLabel:"Short-term Goal",dDayLongLabel:"Final Goal",
+    settingsSave:"Save",settingsCancel:"Cancel",
+    wZones:["Overweight","Caution","Normal","Goal"],
+    tabLabels:{research:"Research",events:"Events",body:"Weight"},
+    titles:["Lecturer","Aspiring Researcher","Awakened Instructor","Tenure Applicant","Proven Researcher","Tenure Candidate"],
+    langBtn:"🌐 한국어",
+  }
+};
+
 const STATS=[
-  {id:"research",  icon:"⚔️",label:"연구실적", sub:"SSCI·SCIE·KCI",       color:C.mok, startGrade:"D", tab:"research"},
-  {id:"methodology",icon:"🔬",label:"연구역량", sub:"방법론·자격증·빅데이터",color:C.mok3,startGrade:"C", tab:"events"},
-  {id:"external",  icon:"🏛️",label:"대외실적", sub:"산학·해외연계·학회",    color:C.to,  startGrade:"F", tab:"events"},
-  {id:"teaching",  icon:"🎓",label:"티칭",     sub:"강의평가·강의다양성",    color:C.geum,startGrade:"A", tab:"events"},
-  {id:"presence",  icon:"💎",label:"프레젠스", sub:"외모·체력·자신감",       color:C.mok2,startGrade:"C", tab:"body"},
-  {id:"network",   icon:"🤝",label:"네트워크", sub:"인맥·추천서·학회활동",   color:C.to2, startGrade:"D", tab:"events"},
+  {id:"research",  icon:"⚔️",labelKo:"연구실적", labelEn:"Research",    subKo:"SSCI·SCIE·KCI",            subEn:"SSCI·SCIE·KCI",           color:"#4ade80", startGrade:"D", tab:"research"},
+  {id:"methodology",icon:"🔬",labelKo:"연구역량", labelEn:"Methodology", subKo:"방법론·자격증·빅데이터",    subEn:"Methods·Certs·Big Data",  color:"#86efac", startGrade:"C", tab:"events"},
+  {id:"external",  icon:"🏛️",labelKo:"대외실적", labelEn:"External",    subKo:"산학·해외연계·학회",        subEn:"Industry·Intl·Conference",color:"#fbbf24", startGrade:"F", tab:"events"},
+  {id:"teaching",  icon:"🎓",labelKo:"티칭",     labelEn:"Teaching",    subKo:"강의평가·강의다양성",        subEn:"Evals·Course Diversity",  color:"#f0f0f0", startGrade:"A", tab:"events"},
+  {id:"presence",  icon:"💎",labelKo:"프레젠스", labelEn:"Presence",    subKo:"외모·체력·자신감",          subEn:"Appearance·Fitness·Confidence",color:"#22c55e",startGrade:"C", tab:"body"},
+  {id:"network",   icon:"🤝",labelKo:"네트워크", labelEn:"Network",     subKo:"인맥·추천서·학회활동",      subEn:"Connections·Letters·Activities",color:"#fcd34d",startGrade:"D", tab:"events"},
 ];
 
 const RESEARCH_TYPES=[
-  {id:"ssci_q1",  label:"SSCI Q1",      icon:"🥇",xp:2000},
-  {id:"ssci_q2",  label:"SSCI Q2",      icon:"🥈",xp:1500},
-  {id:"ssci_q34", label:"SSCI Q3/Q4",   icon:"🥉",xp:1000},
-  {id:"scie",     label:"SCIE",         icon:"📘",xp:800},
-  {id:"scopus",   label:"Scopus",       icon:"📗",xp:500},
-  {id:"kci_a",    label:"KCI 등재",      icon:"📄",xp:300},
-  {id:"kci_b",    label:"KCI 후보",      icon:"📃",xp:150},
-  {id:"proceeding",label:"학술대회",     icon:"🎤",xp:200},
-  {id:"revision", label:"R&R/심사중",    icon:"⏳",xp:100},
-  {id:"working",  label:"Working Paper",icon:"✍️",xp:50},
+  {id:"ssci_q1",  labelKo:"SSCI Q1",       labelEn:"SSCI Q1",      icon:"🥇",xp:2000},
+  {id:"ssci_q2",  labelKo:"SSCI Q2",       labelEn:"SSCI Q2",      icon:"🥈",xp:1500},
+  {id:"ssci_q34", labelKo:"SSCI Q3/Q4",    labelEn:"SSCI Q3/Q4",   icon:"🥉",xp:1000},
+  {id:"scie",     labelKo:"SCIE",          labelEn:"SCIE",         icon:"📘",xp:800},
+  {id:"scopus",   labelKo:"Scopus",        labelEn:"Scopus",       icon:"📗",xp:500},
+  {id:"kci_a",    labelKo:"KCI 등재",       labelEn:"KCI Listed",   icon:"📄",xp:300},
+  {id:"kci_b",    labelKo:"KCI 후보",       labelEn:"KCI Candidate",icon:"📃",xp:150},
+  {id:"proceeding",labelKo:"학술대회",      labelEn:"Conference",   icon:"🎤",xp:200},
+  {id:"revision", labelKo:"R&R/심사중",     labelEn:"R&R/Under Review",icon:"⏳",xp:100},
+  {id:"working",  labelKo:"Working Paper", labelEn:"Working Paper",icon:"✍️",xp:50},
 ];
 
-const PROJECT_STATUS=["구상중","작성중","투고완료","심사중","R&R","게재확정","게재완료"];
+const PROJECT_STATUS_KO=["구상중","작성중","투고완료","심사중","R&R","게재확정","게재완료"];
+const PROJECT_STATUS_EN=["Ideation","Writing","Submitted","Under Review","R&R","Accepted","Published"];
 const STATUS_COLOR={
-  "구상중":C.geum3,"작성중":C.to,"투고완료":C.mok3,
-  "심사중":C.to2,"R&R":C.hwa,"게재확정":C.mok,"게재완료":C.mok2,
+  "구상중":"#555555","작성중":"#fbbf24","투고완료":"#86efac",
+  "심사중":"#fcd34d","R&R":"#ef4444","게재확정":"#4ade80","게재완료":"#22c55e",
+  "Ideation":"#555555","Writing":"#fbbf24","Submitted":"#86efac",
+  "Under Review":"#fcd34d","Accepted":"#4ade80","Published":"#22c55e",
 };
 
 const DAILY_HABITS=[
-  {id:"wake",    label:"6시 기상",          icon:"🌅",xp:{presence:15}},
-  {id:"fast",    label:"8시 이후 금식",      icon:"🚫",xp:{presence:20}},
-  {id:"water",   label:"물 2L 이상",         icon:"💧",xp:{presence:15}},
-  {id:"sleep",   label:"11시 이전 취침",      icon:"🌙",xp:{presence:15}},
-  {id:"meal",    label:"도시락/식사시간 준수",icon:"🍱",xp:{presence:10}},
-  {id:"paper",   label:"논문 5페이지 읽기",   icon:"📄",xp:{research:30,methodology:10}},
-  {id:"write",   label:"100단어 이상 쓰기",   icon:"✍️",xp:{research:40}},
-  {id:"exercise",label:"운동",               icon:"🏃",xp:{presence:25}},
+  {id:"wake",    labelKo:"6시 기상",           labelEn:"Wake by 6am",         icon:"🌅",xp:{presence:15}},
+  {id:"fast",    labelKo:"8시 이후 금식",       labelEn:"No eating after 8pm", icon:"🚫",xp:{presence:20}},
+  {id:"water",   labelKo:"물 2L 이상",          labelEn:"Drink 2L water",      icon:"💧",xp:{presence:15}},
+  {id:"sleep",   labelKo:"11시 이전 취침",       labelEn:"Sleep by 11pm",       icon:"🌙",xp:{presence:15}},
+  {id:"meal",    labelKo:"도시락/식사시간 준수", labelEn:"Stick to meal plan",  icon:"🍱",xp:{presence:10}},
+  {id:"paper",   labelKo:"논문 5페이지 읽기",    labelEn:"Read 5 pages",        icon:"📄",xp:{research:30,methodology:10}},
+  {id:"write",   labelKo:"100단어 이상 쓰기",    labelEn:"Write 100+ words",    icon:"✍️",xp:{research:40}},
+  {id:"exercise",labelKo:"운동",                labelEn:"Exercise",            icon:"🏃",xp:{presence:25}},
 ];
 
 const EVENTS=[
-  {id:"project",    label:"산학 프로젝트 수주",  icon:"💼",xp:{external:300}},
-  {id:"certificate",label:"자격증 취득",          icon:"📜",xp:{methodology:400}},
-  {id:"grooming",   label:"외모관리(왁싱/피부)",  icon:"💅",xp:{presence:50}},
-  {id:"health",     label:"병원/건강검진",         icon:"🏥",xp:{presence:40}},
-  {id:"application",label:"임용 지원서 제출",      icon:"📋",xp:{research:50,network:50}},
-  {id:"interview",  label:"면접 참가",             icon:"🎯",xp:{network:200,teaching:100}},
-  {id:"collab",     label:"해외 연구자 컨택",      icon:"🌐",xp:{external:150,network:100}},
-  {id:"method",     label:"방법론 스터디",          icon:"📊",xp:{methodology:100}},
-  {id:"overseas",   label:"해외학회 참가",          icon:"✈️",xp:{external:300,network:150}},
+  {id:"project",    labelKo:"산학 프로젝트 수주",  labelEn:"Industry Project",      icon:"💼",xp:{external:300}},
+  {id:"certificate",labelKo:"자격증 취득",          labelEn:"Certification",         icon:"📜",xp:{methodology:400}},
+  {id:"grooming",   labelKo:"외모관리(왁싱/피부)",  labelEn:"Grooming/Skincare",     icon:"💅",xp:{presence:50}},
+  {id:"health",     labelKo:"병원/건강검진",         labelEn:"Medical Checkup",       icon:"🏥",xp:{presence:40}},
+  {id:"application",labelKo:"임용 지원서 제출",      labelEn:"Faculty Application",   icon:"📋",xp:{research:50,network:50}},
+  {id:"interview",  labelKo:"면접 참가",             labelEn:"Interview",             icon:"🎯",xp:{network:200,teaching:100}},
+  {id:"collab",     labelKo:"해외 연구자 컨택",      labelEn:"Intl Researcher Contact",icon:"🌐",xp:{external:150,network:100}},
+  {id:"method",     labelKo:"방법론 스터디",          labelEn:"Methodology Study",     icon:"📊",xp:{methodology:100}},
+  {id:"overseas",   labelKo:"해외학회 참가",          labelEn:"Overseas Conference",   icon:"✈️",xp:{external:300,network:150}},
 ];
 
 const W={current:61.7,z1:57,z2:52,z3:47};
-const TITLES=[
-  {minLevel:1,title:"시간강사"},{minLevel:5,title:"연구자 지망생"},
-  {minLevel:10,title:"각성한 강사"},{minLevel:20,title:"임용 도전자"},
-  {minLevel:30,title:"검증된 연구자"},{minLevel:50,title:"테뉴어 후보"},
-];
+const TITLES_KO=["시간강사","연구자 지망생","각성한 강사","임용 도전자","검증된 연구자","테뉴어 후보"];
+const TITLES_EN=["Lecturer","Aspiring Researcher","Awakened Instructor","Tenure Applicant","Proven Researcher","Tenure Candidate"];
+const TITLE_LEVELS=[1,5,10,20,30,50];
+
 const DEFAULT_PROJECTS=[
   {id:"dja",title:"DJA 논문",sub:"GenAI × 직업불안 PLS-SEM",journal:"IJPR",status:"투고완료",progress:80,deadline:"2026-06-04",notes:"KORMS 발표본 별도",papers:[]},
   {id:"dpm",title:"DPM 논문",sub:"디자인 관여도 × NPD성과",journal:"JMTM",status:"R&R",progress:40,deadline:"",notes:"이론적 기여 보강 필요",papers:[]},
@@ -107,26 +236,33 @@ const DEFAULT_PROJECTS=[
 
 const SHEET_URL="https://script.google.com/macros/s/AKfycbzHEQayswiNH6MHj-AVxDpyr3fWF2wQnlWbmH6nOt3OpIxGwR3vbpUtuF2Q9vuKJ4xX8w/exec";
 
-function getTitle(lv){const t=[...TITLES].reverse().find(function(t){return lv>=t.minLevel;});return t?t.title:"시간강사";}
+function getTitle(lv,lang){
+  var idx=0;
+  for(var i=0;i<TITLE_LEVELS.length;i++){if(lv>=TITLE_LEVELS[i])idx=i;}
+  return lang==="en"?TITLES_EN[idx]:TITLES_KO[idx];
+}
 function gradeFromXP(xp){var g="F";for(var i=0;i<GRADES.length;i++){if(xp>=GRADE_XP[GRADES[i]])g=GRADES[i];}return g;}
 function gradeProgress(xp){var g=gradeFromXP(xp);return Math.min(((xp-GRADE_XP[g])/(NEXT_XP[g]-GRADE_XP[g]))*100,100);}
-function gradeColor(g){return{F:C.hwa,D:C.geum2,C:C.mok3,B:C.mok,A:C.mok2,S:C.to,SS:C.to2,SSS:"#fff"}[g]||C.geum2;}
+function gradeColor(g){return{F:"#ef4444",D:"#888888",C:"#86efac",B:"#4ade80",A:"#22c55e",S:"#fbbf24",SS:"#fcd34d",SSS:"#fff"}[g]||"#888888";}
 function daysUntil(d){if(!d)return null;return Math.ceil((new Date(d)-new Date())/86400000);}
 function todayStr(){return new Date().toISOString().split("T")[0];}
 function initStatXP(){var o={};STATS.forEach(function(s){o[s.id]=GRADE_XP[s.startGrade];});return o;}
 function defaultState(){return{statXP:initStatXP(),totalXP:0,streak:0,totalDays:0,lastCheckinDate:null,todayHabits:{},log:[],weightLog:[{date:todayStr(),weight:W.current}],researchLog:[],projects:DEFAULT_PROJECTS,settings:{dDayShort:{label:"단기목표",date:"2026-09-01"},dDayLong:{label:"최종목표",date:"2027-03-01"}}};}
 function loadLocal(){try{var r=localStorage.getItem("levelup_v4");if(r)return Object.assign({},defaultState(),JSON.parse(r));}catch(e){}return defaultState();}
 function saveLocal(s){try{localStorage.setItem("levelup_v4",JSON.stringify(s));}catch(e){}}
+function loadLang(){try{return localStorage.getItem("levelup_lang")||"en";}catch(e){return"en";}}
+function saveLang(l){try{localStorage.setItem("levelup_lang",l);}catch(e){}}
 
 function Btn(props){
   return React.createElement("button",{onClick:props.onClick,disabled:props.disabled,style:Object.assign({cursor:props.disabled?"not-allowed":"pointer",fontFamily:"'Noto Sans KR',sans-serif"},props.style)},props.children);
 }
 function Inp(props){
-  return React.createElement("input",{value:props.value,onChange:props.onChange,placeholder:props.placeholder,type:props.type||"text",style:Object.assign({background:C.su2,border:"1px solid "+C.mok+"44",borderRadius:8,padding:"9px 12px",color:C.geum,fontFamily:"'Noto Sans KR',sans-serif",fontSize:"0.88rem",width:"100%",outline:"none"},props.style)});
+  return React.createElement("input",{value:props.value,onChange:props.onChange,placeholder:props.placeholder,type:props.type||"text",style:Object.assign({background:"#111a11",border:"1px solid #4ade8044",borderRadius:8,padding:"9px 12px",color:"#f0f0f0",fontFamily:"'Noto Sans KR',sans-serif",fontSize:"0.88rem",width:"100%",outline:"none"},props.style)});
 }
 
 function App(){
   const [state,setState]=useState(loadLocal);
+  const [lang,setLang]=useState(loadLang);
   const [tab,setTab]=useState("main");
   const [notif,setNotif]=useState(null);
   const [particles,setParticles]=useState([]);
@@ -140,6 +276,14 @@ function App(){
   const [weightInput,setWeightInput]=useState("");
   const [showWeight,setShowWeight]=useState(false);
   const [settingsForm,setSettingsForm]=useState(null);
+
+  const L=LANG[lang];
+  const PROJECT_STATUS=lang==="en"?PROJECT_STATUS_EN:PROJECT_STATUS_KO;
+
+  function toggleLang(){
+    var nl=lang==="ko"?"en":"ko";
+    setLang(nl);saveLang(nl);
+  }
 
   useEffect(function(){saveLocal(state);},[state]);
 
@@ -177,7 +321,7 @@ function App(){
 
   function notify(msg,color){setNotif({msg:msg,color:color||C.mok});setTimeout(function(){setNotif(null);},3000);}
   function spark(){
-    setParticles(Array.from({length:10},function(_,i){return{id:Date.now()+i,x:20+Math.random()*60,delay:Math.random()*0.4};},));
+    setParticles(Array.from({length:10},function(_,i){return{id:Date.now()+i,x:20+Math.random()*60,delay:Math.random()*0.4};}));
     setTimeout(function(){setParticles([]);},2000);
   }
 
@@ -189,23 +333,16 @@ function App(){
       var wasChecked=!!prevHabits[hid];
       var newChecked=Object.assign({},prevHabits);
       var xpDiff={};
-      if(wasChecked){
-        delete newChecked[hid];
-        Object.entries(h.xp).forEach(function(kv){xpDiff[kv[0]]=-kv[1];});
-      } else {
-        newChecked[hid]=true;
-        Object.entries(h.xp).forEach(function(kv){xpDiff[kv[0]]=kv[1];});
-      }
+      if(wasChecked){delete newChecked[hid];Object.entries(h.xp).forEach(function(kv){xpDiff[kv[0]]=-kv[1];});}
+      else{newChecked[hid]=true;Object.entries(h.xp).forEach(function(kv){xpDiff[kv[0]]=kv[1];});}
       var nx=Object.assign({},prev.statXP);
       Object.entries(xpDiff).forEach(function(kv){nx[kv[0]]=(nx[kv[0]]||0)+kv[1];});
       var totalDiff=Object.values(xpDiff).reduce(function(a,b){return a+b;},0);
       var checkedCount=Object.keys(newChecked).length;
-      var isPerfect=checkedCount===DAILY_HABITS.length;
       var yest=new Date(Date.now()-86400000).toISOString().split("T")[0];
       var isNewDay=prev.lastCheckinDate!==today;
       return Object.assign({},prev,{
-        statXP:nx,
-        totalXP:prev.totalXP+totalDiff,
+        statXP:nx,totalXP:prev.totalXP+totalDiff,
         todayHabits:{date:today,checked:newChecked},
         lastCheckinDate:today,
         streak:isNewDay?(prev.lastCheckinDate===yest?prev.streak+1:1):prev.streak,
@@ -213,34 +350,37 @@ function App(){
         log:isNewDay&&!wasChecked?[{date:today,type:"checkin",habits:checkedCount,xp:totalDiff,icon:"✅"}].concat(prev.log.slice(0,99)):prev.log,
       });
     });
-    if(!todayHabits[hid]) spark();
+    if(!todayHabits[hid])spark();
   }
 
   function doEvent(ev){
     var total=Object.values(ev.xp).reduce(function(a,b){return a+b;},0);
+    var label=lang==="en"?ev.labelEn:ev.labelKo;
     setState(function(prev){
       var nx=Object.assign({},prev.statXP);
       Object.entries(ev.xp).forEach(function(kv){nx[kv[0]]=(nx[kv[0]]||0)+kv[1];});
       return Object.assign({},prev,{statXP:nx,totalXP:prev.totalXP+total,
-        log:[{date:today,type:"event",label:ev.label,icon:ev.icon,xp:total}].concat(prev.log.slice(0,99))});
+        log:[{date:today,type:"event",label:label,icon:ev.icon,xp:total}].concat(prev.log.slice(0,99))});
     });
-    spark();notify(ev.icon+" "+ev.label+" +"+total+" XP!",C.to);
+    spark();notify(ev.icon+" "+label+" +"+total+" XP!",C.to);
   }
 
   function submitPaper(){
     var rt=RESEARCH_TYPES.find(function(r){return r.id===paperForm.type;});
     if(!rt||!paperForm.title)return;
-    var bonus=paperForm.role==="1저자"?1:paperForm.role==="교신저자"?0.9:0.5;
+    var roles=L.paperRoles;
+    var bonus=paperForm.role===roles[0]?1:paperForm.role===roles[1]?0.9:0.5;
     var xp=Math.round(rt.xp*bonus);
-    var entry={id:Date.now(),date:today,typeId:rt.id,typeLabel:rt.label,icon:rt.icon,title:paperForm.title,journal:paperForm.journal,role:paperForm.role,projectId:paperForm.projectId,xp:xp};
+    var typeLabel=lang==="en"?rt.labelEn:rt.labelKo;
+    var entry={id:Date.now(),date:today,typeId:rt.id,typeLabel:typeLabel,icon:rt.icon,title:paperForm.title,journal:paperForm.journal,role:paperForm.role,projectId:paperForm.projectId,xp:xp};
     setState(function(prev){
       var nx=Object.assign({},prev.statXP,{research:(prev.statXP.research||0)+xp});
       var nprj=prev.projects.map(function(p){return p.id===paperForm.projectId?Object.assign({},p,{papers:(p.papers||[]).concat([entry])}):p;});
       return Object.assign({},prev,{statXP:nx,totalXP:prev.totalXP+xp,researchLog:[entry].concat(prev.researchLog||[]),projects:nprj,
-        log:[{date:today,type:"research",label:rt.icon+" "+rt.label,icon:rt.icon,xp:xp}].concat(prev.log.slice(0,99))});
+        log:[{date:today,type:"research",label:rt.icon+" "+typeLabel,icon:rt.icon,xp:xp}].concat(prev.log.slice(0,99))});
     });
-    spark();notify(rt.icon+" "+rt.label+" +"+xp+" XP!",C.mok);
-    setShowPaper(false);setPaperForm({type:"",title:"",journal:"",role:"1저자",projectId:""});
+    spark();notify(rt.icon+" "+typeLabel+" +"+xp+" XP!",C.mok);
+    setShowPaper(false);setPaperForm({type:"",title:"",journal:"",role:L.paperRoles[0],projectId:""});
   }
 
   function savePrj(){
@@ -249,8 +389,8 @@ function App(){
       if(editingPrj){return Object.assign({},prev,{projects:prev.projects.map(function(p){return p.id===editingPrj?Object.assign({},p,prjForm):p;})});}
       return Object.assign({},prev,{projects:prev.projects.concat([Object.assign({},prjForm,{id:String(Date.now()),papers:[]})])});
     });
-    notify(editingPrj?"수정 완료":"프로젝트 추가!",C.mok);
-    setShowProject(false);setEditingPrj(null);setPrjForm({title:"",sub:"",journal:"",status:"작성중",progress:0,deadline:"",notes:""});
+    notify(editingPrj?(lang==="en"?"Updated!":"수정 완료"):(lang==="en"?"Project Added!":"프로젝트 추가!"),C.mok);
+    setShowProject(false);setEditingPrj(null);setPrjForm({title:"",sub:"",journal:"",status:PROJECT_STATUS[0],progress:0,deadline:"",notes:""});
   }
 
   function logWeight(){
@@ -260,26 +400,27 @@ function App(){
       weightLog:(prev.weightLog||[]).concat([{date:today,weight:w}]).slice(-60),
       log:[{date:today,type:"weight",weight:w,icon:"⚖️",xp:0}].concat(prev.log.slice(0,99)),
     });});
-    notify("체중 기록: "+w+"kg",C.mok3);setWeightInput("");setShowWeight(false);
+    notify((lang==="en"?"Weight logged: ":"체중 기록: ")+w+"kg",C.mok3);
+    setWeightInput("");setShowWeight(false);
   }
 
   function wZone(w){
-    if(w>W.z1)return{label:"과체중",color:C.hwa,emoji:"🔴"};
-    if(w>W.z2)return{label:"주의",color:C.to,emoji:"🟡"};
-    if(w>W.z3)return{label:"정상",color:C.mok3,emoji:"🟢"};
-    return{label:"이상",color:C.mok,emoji:"⭐"};
+    if(w>W.z1)return{label:L.wZones[0],color:C.hwa,emoji:"🔴"};
+    if(w>W.z2)return{label:L.wZones[1],color:C.to,emoji:"🟡"};
+    if(w>W.z3)return{label:L.wZones[2],color:C.mok3,emoji:"🟢"};
+    return{label:L.wZones[3],color:C.mok,emoji:"⭐"};
   }
   var zone=wZone(latestW);
   var dds=daysUntil(settings.dDayShort.date);
   var ddl=daysUntil(settings.dDayLong.date);
 
   var TABS=[
-    {id:"main",icon:"📊",label:"스탯"},
-    {id:"research",icon:"📚",label:"연구"},
-    {id:"events",icon:"📌",label:"실적"},
-    {id:"body",icon:"💎",label:"체중"},
-    {id:"settings",icon:"⚙️",label:"설정"},
-    {id:"log",icon:"📋",label:"로그"},
+    {id:"main",icon:"📊",label:L.tabs[0]},
+    {id:"research",icon:"📚",label:L.tabs[1]},
+    {id:"events",icon:"📌",label:L.tabs[2]},
+    {id:"body",icon:"💎",label:L.tabs[3]},
+    {id:"settings",icon:"⚙️",label:L.tabs[4]},
+    {id:"log",icon:"📋",label:L.tabs[5]},
   ];
 
   var S={
@@ -312,6 +453,7 @@ function App(){
     sBadge:{fontSize:"0.68rem",fontWeight:700,padding:"2px 8px",borderRadius:5,border:"1px solid"},
     mTag:{fontSize:"0.68rem",color:C.geum2,background:C.su3,padding:"2px 7px",borderRadius:4},
     sRow:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:"1px solid "+C.mok+"11",fontSize:"0.82rem"},
+    langBtn:{background:"transparent",border:"1px solid "+C.mok+"55",borderRadius:20,padding:"3px 10px",color:C.mok,fontSize:"0.7rem",cursor:"pointer",fontFamily:"'Share Tech Mono',monospace"},
   };
 
   return (
@@ -324,14 +466,17 @@ function App(){
         {/* 헤더 */}
         <div style={S.header}>
           <div>
-            <div style={S.name}>손지윤</div>
-            <div style={{color:C.mok,fontSize:"0.75rem",marginTop:2}}>{getTitle(level)}</div>
+            <div style={S.name}>{L.name}</div>
+            <div style={{color:C.mok,fontSize:"0.75rem",marginTop:2}}>{getTitle(level,lang)}</div>
           </div>
           <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
-            <div style={S.lv}>Lv.{level}</div>
-            <div style={{fontSize:"0.75rem",color:C.to}}>🔥 {state.streak}일 연속</div>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              <button onClick={toggleLang} style={S.langBtn}>{L.langBtn}</button>
+              <div style={S.lv}>Lv.{level}</div>
+            </div>
+            <div style={{fontSize:"0.75rem",color:C.to}}>🔥 {state.streak}{L.streak}</div>
             <div style={{fontSize:"0.6rem",color:syncStatus==="ok"?C.mok:syncStatus==="syncing"?C.to:C.hwa}}>
-              {syncStatus==="ok"?"☁️ 동기화됨":syncStatus==="syncing"?"⏳ 동기화중...":"⚠️ 오프라인"}
+              {L.sync[syncStatus]||L.sync.error}
             </div>
           </div>
         </div>
@@ -339,13 +484,13 @@ function App(){
         {/* D-Day */}
         <div style={S.ddRow}>
           {[
-            {label:settings.dDayShort.label,val:"-"+dds,color:C.to,sub:settings.dDayShort.date},
-            {label:settings.dDayLong.label, val:"-"+ddl,color:C.hwa,sub:settings.dDayLong.date},
-            {label:"누적 XP",val:state.totalXP.toLocaleString(),color:C.mok,sub:state.totalDays+"일"},
+            {label:settings.dDayShort.label,val:"D-"+dds,color:C.to,sub:settings.dDayShort.date},
+            {label:settings.dDayLong.label, val:"D-"+ddl,color:C.hwa,sub:settings.dDayLong.date},
+            {label:L.totalXP,val:state.totalXP.toLocaleString(),color:C.mok,sub:state.totalDays+L.totalDays},
           ].map(function(d){return(
             <div key={d.label} style={S.ddBox}>
               <span style={{fontSize:"0.58rem",color:C.geum3,fontFamily:"'Share Tech Mono',monospace"}}>{d.label}</span>
-              <span style={{fontFamily:"'Share Tech Mono',monospace",fontWeight:900,fontSize:d.label==="누적 XP"?"0.9rem":"1.15rem",color:d.color}}>{d.val}</span>
+              <span style={{fontFamily:"'Share Tech Mono',monospace",fontWeight:900,fontSize:d.label===L.totalXP?"0.9rem":"1.15rem",color:d.color}}>{d.val}</span>
               <span style={{fontSize:"0.55rem",color:C.geum3}}>{d.sub}</span>
             </div>
           );})}
@@ -365,7 +510,9 @@ function App(){
         {tab==="main"&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
           {STATS.map(function(stat){
             var xp=state.statXP[stat.id]||0,g=gradeFromXP(xp),pct=gradeProgress(xp),gc=gradeColor(g);
-            var tabLabel={research:"연구",events:"실적",body:"체중"}[stat.tab]||stat.tab;
+            var statLabel=lang==="en"?stat.labelEn:stat.labelKo;
+            var statSub=lang==="en"?stat.subEn:stat.subKo;
+            var tabLabel=L.tabLabels[stat.tab]||stat.tab;
             return(
               <div key={stat.id}
                 onClick={function(){setTab(stat.tab);}}
@@ -375,8 +522,8 @@ function App(){
                 <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
                   <span style={{fontSize:"1.3rem"}}>{stat.icon}</span>
                   <div style={{flex:1}}>
-                    <div style={{fontWeight:700,fontSize:"0.92rem",color:C.geum}}>{stat.label}</div>
-                    <div style={{fontSize:"0.65rem",color:C.geum3,marginTop:1}}>{stat.sub}</div>
+                    <div style={{fontWeight:700,fontSize:"0.92rem",color:C.geum}}>{statLabel}</div>
+                    <div style={{fontSize:"0.65rem",color:C.geum3,marginTop:1}}>{statSub}</div>
                   </div>
                   <div style={Object.assign({},S.grade,{color:gc,borderColor:gc})}>{g}</div>
                   <span style={{fontSize:"0.6rem",color:stat.color,fontFamily:"monospace",opacity:0.7}}>{"→ "+tabLabel}</span>
@@ -390,8 +537,8 @@ function App(){
 
         {/* 연구 */}
         {tab==="research"&&<div>
-          <Btn onClick={function(){setEditingPrj(null);setPrjForm({title:"",sub:"",journal:"",status:"작성중",progress:0,deadline:"",notes:""});setShowProject(true);}} style={Object.assign({},S.outline,{marginBottom:8})}>+ 새 연구 프로젝트</Btn>
-          <Btn onClick={function(){setShowPaper(true);}} style={Object.assign({},S.outline,{borderColor:C.to+"88",color:C.to,marginBottom:16})}>+ 논문/실적 등록</Btn>
+          <Btn onClick={function(){setEditingPrj(null);setPrjForm({title:"",sub:"",journal:"",status:PROJECT_STATUS[0],progress:0,deadline:"",notes:""});setShowProject(true);}} style={Object.assign({},S.outline,{marginBottom:8})}>{L.newProject}</Btn>
+          <Btn onClick={function(){setShowPaper(true);}} style={Object.assign({},S.outline,{borderColor:C.to+"88",color:C.to,marginBottom:16})}>{L.newPaper}</Btn>
 
           {(state.projects||[]).map(function(p){
             var dd=daysUntil(p.deadline),sc=STATUS_COLOR[p.status]||C.geum2,pc=(p.papers||[]).length;
@@ -406,8 +553,8 @@ function App(){
                 </div>
                 <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:10}}>
                   {p.journal&&<span style={S.mTag}>🎯 {p.journal}</span>}
-                  {dd!==null&&<span style={Object.assign({},S.mTag,{color:dd<7?C.hwa:dd<30?C.to:C.geum2})}>{dd>=0?"D-"+dd:"기한초과"}</span>}
-                  {pc>0&&<span style={Object.assign({},S.mTag,{color:C.mok})}>📄 {pc}편</span>}
+                  {dd!==null&&<span style={Object.assign({},S.mTag,{color:dd<7?C.hwa:dd<30?C.to:C.geum2})}>{dd>=0?"D-"+dd:(lang==="en"?"Overdue":"기한초과")}</span>}
+                  {pc>0&&<span style={Object.assign({},S.mTag,{color:C.mok})}>📄 {pc}</span>}
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                   <div style={Object.assign({},S.bar,{flex:1})}><div style={Object.assign({},S.fill,{width:(p.progress||0)+"%",background:"linear-gradient(90deg,"+sc+"77,"+sc+")"})}/></div>
@@ -415,15 +562,15 @@ function App(){
                 </div>
                 {p.notes&&<div style={{fontSize:"0.68rem",color:C.geum3,marginBottom:8,fontStyle:"italic"}}>💬 {p.notes}</div>}
                 <div style={{display:"flex",gap:6,marginTop:8}}>
-                  <Btn onClick={function(){setEditingPrj(p.id);setPrjForm({title:p.title,sub:p.sub||"",journal:p.journal||"",status:p.status||"작성중",progress:p.progress||0,deadline:p.deadline||"",notes:p.notes||""});setShowProject(true);}} style={{flex:1,padding:"6px 0",background:"transparent",border:"1px solid "+C.mok+"55",borderRadius:7,fontSize:"0.75rem",color:C.mok}}>편집</Btn>
-                  <Btn onClick={function(){setState(function(prev){return Object.assign({},prev,{projects:prev.projects.filter(function(x){return x.id!==p.id;})});});notify("삭제",C.hwa);}} style={{padding:"6px 12px",background:"transparent",border:"1px solid "+C.hwa+"55",borderRadius:7,fontSize:"0.75rem",color:C.hwa}}>삭제</Btn>
+                  <Btn onClick={function(){setEditingPrj(p.id);setPrjForm({title:p.title,sub:p.sub||"",journal:p.journal||"",status:p.status||PROJECT_STATUS[0],progress:p.progress||0,deadline:p.deadline||"",notes:p.notes||""});setShowProject(true);}} style={{flex:1,padding:"6px 0",background:"transparent",border:"1px solid "+C.mok+"55",borderRadius:7,fontSize:"0.75rem",color:C.mok}}>{L.edit}</Btn>
+                  <Btn onClick={function(){setState(function(prev){return Object.assign({},prev,{projects:prev.projects.filter(function(x){return x.id!==p.id;})});});notify(lang==="en"?"Deleted":"삭제",C.hwa);}} style={{padding:"6px 12px",background:"transparent",border:"1px solid "+C.hwa+"55",borderRadius:7,fontSize:"0.75rem",color:C.hwa}}>{L.del}</Btn>
                 </div>
               </div>
             );
           })}
 
           {(state.researchLog||[]).length>0&&<div>
-            <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",margin:"12px 0 8px"}}>📋 전체 논문 목록</div>
+            <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",margin:"12px 0 8px"}}>{L.paperList}</div>
             {(state.researchLog||[]).map(function(r,i){return(
               <div key={i} style={S.logRow}>
                 <span>{r.icon}</span>
@@ -439,32 +586,35 @@ function App(){
 
         {/* 실적 */}
         {tab==="events"&&<div>
-          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>📌 이벤트 실적 입력</div>
-          {EVENTS.map(function(ev){return(
-            <Btn key={ev.id} onClick={function(){doEvent(ev);}} style={S.evBtn}>
-              <span style={{fontSize:"1.1rem"}}>{ev.icon}</span>
-              <span style={{flex:1,textAlign:"left",fontSize:"0.88rem"}}>{ev.label}</span>
-              <span style={{color:C.to,fontFamily:"monospace",fontSize:"0.72rem"}}>+{Object.values(ev.xp).reduce(function(a,b){return a+b;},0)} XP</span>
-            </Btn>
-          );})}
+          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>{L.eventsTitle}</div>
+          {EVENTS.map(function(ev){
+            var evLabel=lang==="en"?ev.labelEn:ev.labelKo;
+            return(
+              <Btn key={ev.id} onClick={function(){doEvent(ev);}} style={S.evBtn}>
+                <span style={{fontSize:"1.1rem"}}>{ev.icon}</span>
+                <span style={{flex:1,textAlign:"left",fontSize:"0.88rem"}}>{evLabel}</span>
+                <span style={{color:C.to,fontFamily:"monospace",fontSize:"0.72rem"}}>+{Object.values(ev.xp).reduce(function(a,b){return a+b;},0)} XP</span>
+              </Btn>
+            );
+          })}
         </div>}
 
         {/* 체중 */}
         {tab==="body"&&<div>
-          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>💎 체중 관리 — 167cm</div>
+          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>{L.bodyTitle}</div>
           <div style={Object.assign({},S.card,{borderColor:zone.color+"66",marginBottom:12})}>
             <div style={{display:"flex",alignItems:"center",gap:14}}>
               <span style={{fontSize:"2.2rem"}}>{zone.emoji}</span>
               <div>
                 <div style={{fontFamily:"monospace",fontSize:"1.8rem",color:zone.color,fontWeight:900,lineHeight:1}}>{latestW}kg</div>
-                <div style={{color:zone.color,fontSize:"0.78rem",marginTop:3}}>{zone.label} 구간</div>
+                <div style={{color:zone.color,fontSize:"0.78rem",marginTop:3}}>{zone.label}</div>
               </div>
             </div>
           </div>
           {[
-            {label:"1단계 과체중 해제",formula:"167-110",target:W.z1,color:C.to},
-            {label:"2단계 정상 체중",  formula:"167-115",target:W.z2,color:C.mok3},
-            {label:"3단계 이상(멋짐)", formula:"167-120",target:W.z3,color:C.mok},
+            {label:L.bodyZones[0],formula:"167-110",target:W.z1,color:C.to},
+            {label:L.bodyZones[1],formula:"167-115",target:W.z2,color:C.mok3},
+            {label:L.bodyZones[2],formula:"167-120",target:W.z3,color:C.mok},
           ].map(function(st){
             var done=latestW<=st.target;
             var pct=done?100:Math.max(0,((W.current-latestW)/(W.current-st.target))*100);
@@ -475,7 +625,7 @@ function App(){
                     <div style={{fontSize:"0.82rem",fontWeight:700,color:st.color}}>{st.label}</div>
                     <div style={{fontSize:"0.65rem",color:C.geum3,fontFamily:"monospace"}}>{st.formula} = {st.target}kg</div>
                   </div>
-                  <div style={{fontFamily:"monospace",fontWeight:900,color:done?st.color:C.geum2}}>{done?"✅ 달성":"-"+(latestW-st.target).toFixed(1)+"kg"}</div>
+                  <div style={{fontFamily:"monospace",fontWeight:900,color:done?st.color:C.geum2}}>{done?L.achieved:"-"+(latestW-st.target).toFixed(1)+"kg"}</div>
                 </div>
                 <div style={S.bar}><div style={Object.assign({},S.fill,{width:pct+"%",background:st.color})}/></div>
               </div>
@@ -483,15 +633,15 @@ function App(){
           })}
           {showWeight?(
             <div style={{display:"flex",gap:8,marginTop:10}}>
-              <Inp value={weightInput} onChange={function(e){setWeightInput(e.target.value);}} placeholder="오늘 체중 (kg)" type="number" style={{flex:1}}/>
-              <Btn onClick={logWeight} style={Object.assign({},S.solid,{padding:"9px 14px",width:"auto"})}>기록</Btn>
-              <Btn onClick={function(){setShowWeight(false);}} style={{padding:"9px 14px",background:"#333",border:"none",borderRadius:8,color:C.geum,cursor:"pointer"}}>취소</Btn>
+              <Inp value={weightInput} onChange={function(e){setWeightInput(e.target.value);}} placeholder={L.bodyPlaceholder} type="number" style={{flex:1}}/>
+              <Btn onClick={logWeight} style={Object.assign({},S.solid,{padding:"9px 14px",width:"auto"})}>{L.bodyBtn}</Btn>
+              <Btn onClick={function(){setShowWeight(false);}} style={{padding:"9px 14px",background:"#333",border:"none",borderRadius:8,color:C.geum,cursor:"pointer"}}>{L.bodyCancel}</Btn>
             </div>
           ):(
-            <Btn onClick={function(){setShowWeight(true);}} style={Object.assign({},S.outline,{marginTop:10})}>+ 오늘 체중 기록</Btn>
+            <Btn onClick={function(){setShowWeight(true);}} style={Object.assign({},S.outline,{marginTop:10})}>{L.bodyRecord}</Btn>
           )}
           {wArr.length>1&&<div style={{marginTop:12}}>
-            <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:8}}>최근 기록</div>
+            <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:8}}>{L.bodyRecent}</div>
             {wArr.slice().reverse().slice(0,7).map(function(w,i,arr){
               var prev=arr[i+1],diff=prev?(w.weight-prev.weight).toFixed(1):null;
               return(
@@ -507,20 +657,22 @@ function App(){
 
         {/* 설정 */}
         {tab==="settings"&&<div>
-          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>⚙️ D-Day 설정</div>
+          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>{L.settingsTitle}</div>
           {!settingsForm?(
             <div>
               <div style={S.card}>
                 <div style={S.sRow}><span style={{color:C.geum2}}>{settings.dDayShort.label}</span><span style={{color:C.to,fontFamily:"monospace"}}>{settings.dDayShort.date} (D-{dds})</span></div>
                 <div style={S.sRow}><span style={{color:C.geum2}}>{settings.dDayLong.label}</span><span style={{color:C.hwa,fontFamily:"monospace"}}>{settings.dDayLong.date} (D-{ddl})</span></div>
               </div>
-              <Btn onClick={function(){setSettingsForm(JSON.parse(JSON.stringify(settings)));}} style={Object.assign({},S.outline,{marginTop:8})}>✏️ D-Day 수정</Btn>
+              <Btn onClick={function(){setSettingsForm(JSON.parse(JSON.stringify(settings)));}} style={Object.assign({},S.outline,{marginTop:8})}>{L.settingsEdit}</Btn>
             </div>
           ):(
             <div style={S.card}>
               {[
-                {lbl:"단기목표 이름",k:"short",f:"label"},{lbl:"단기목표 날짜",k:"short",f:"date",type:"date"},
-                {lbl:"최종목표 이름",k:"long",f:"label"},{lbl:"최종목표 날짜",k:"long",f:"date",type:"date"},
+                {lbl:lang==="en"?"Short-term Name":"단기목표 이름",k:"short",f:"label"},
+                {lbl:lang==="en"?"Short-term Date":"단기목표 날짜",k:"short",f:"date",type:"date"},
+                {lbl:lang==="en"?"Final Goal Name":"최종목표 이름",k:"long",f:"label"},
+                {lbl:lang==="en"?"Final Goal Date":"최종목표 날짜",k:"long",f:"date",type:"date"},
               ].map(function(field){return(
                 <div key={field.lbl} style={{marginBottom:12}}>
                   <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{field.lbl}</div>
@@ -538,19 +690,20 @@ function App(){
                 </div>
               );})}
               <div style={{display:"flex",gap:8}}>
-                <Btn onClick={function(){setState(function(prev){return Object.assign({},prev,{settings:settingsForm});});notify("설정 저장!",C.mok);setSettingsForm(null);}} style={Object.assign({},S.solid,{flex:1})}>저장</Btn>
-                <Btn onClick={function(){setSettingsForm(null);}} style={{flex:1,padding:13,background:"#333",border:"none",borderRadius:12,color:C.geum,cursor:"pointer"}}>취소</Btn>
+                <Btn onClick={function(){setState(function(prev){return Object.assign({},prev,{settings:settingsForm});});notify(lang==="en"?"Saved!":"설정 저장!",C.mok);setSettingsForm(null);}} style={Object.assign({},S.solid,{flex:1})}>{L.settingsSave}</Btn>
+                <Btn onClick={function(){setSettingsForm(null);}} style={{flex:1,padding:13,background:"#333",border:"none",borderRadius:12,color:C.geum,cursor:"pointer"}}>{L.settingsCancel}</Btn>
               </div>
             </div>
           )}
 
-          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",margin:"16px 0 10px"}}>📊 스탯 현황</div>
+          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",margin:"16px 0 10px"}}>{L.statsTitle}</div>
           {STATS.map(function(s){
             var xp=state.statXP[s.id]||0,g=gradeFromXP(xp);
+            var sLabel=lang==="en"?s.labelEn:s.labelKo;
             return(
               <div key={s.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:"1px solid "+C.mok+"11"}}>
                 <span>{s.icon}</span>
-                <span style={{flex:1,fontSize:"0.85rem"}}>{s.label}</span>
+                <span style={{flex:1,fontSize:"0.85rem"}}>{sLabel}</span>
                 <span style={{fontFamily:"monospace",color:gradeColor(g),fontWeight:700}}>{g}</span>
                 <span style={{fontSize:"0.7rem",color:C.geum3,fontFamily:"monospace"}}>{xp.toLocaleString()} XP</span>
               </div>
@@ -558,19 +711,19 @@ function App(){
           })}
 
           <div style={{marginTop:16}}>
-            <Btn onClick={function(){if(window.confirm('정말 초기화? 모든 데이터가 삭제돼')){localStorage.removeItem('levelup_v4');window.location.reload();}}} style={{width:"100%",padding:13,background:C.hwa+"22",border:"1px solid "+C.hwa+"44",borderRadius:12,color:C.hwa,cursor:"pointer",fontSize:"0.9rem"}}>전체 초기화</Btn>
+            <Btn onClick={function(){if(window.confirm(L.resetConfirm)){localStorage.removeItem('levelup_v4');window.location.reload();}}} style={{width:"100%",padding:13,background:C.hwa+"22",border:"1px solid "+C.hwa+"44",borderRadius:12,color:C.hwa,cursor:"pointer",fontSize:"0.9rem"}}>{L.reset}</Btn>
           </div>
         </div>}
 
         {/* 로그 */}
         {tab==="log"&&<div>
-          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>📋 활동 로그</div>
-          {state.log.length===0&&<div style={{color:C.geum3,textAlign:"center",marginTop:30}}>아직 기록 없음</div>}
+          <div style={{fontWeight:700,color:C.mok,fontSize:"0.85rem",marginBottom:10}}>{L.logTitle}</div>
+          {state.log.length===0&&<div style={{color:C.geum3,textAlign:"center",marginTop:30}}>{L.logEmpty}</div>}
           {state.log.map(function(e,i){return(
             <div key={i} style={S.logRow}>
               <span style={S.logDate}>{e.date}</span>
               <span style={{flex:1,color:C.geum,fontSize:"0.8rem"}}>
-                {e.type==="checkin"?"✅ 체크인 ("+e.habits+"개 습관)":e.type==="weight"?"⚖️ 체중 "+e.weight+"kg":(e.icon||"")+" "+(e.label||"")}
+                {e.type==="checkin"?"✅ "+(lang==="en"?"Check-in ("+e.habits+" habits)":"체크인 ("+e.habits+"개 습관)"):e.type==="weight"?"⚖️ "+e.weight+"kg":(e.icon||"")+" "+(e.label||"")}
               </span>
               {e.xp>0&&<span style={{color:C.mok,fontFamily:"monospace",fontSize:"0.7rem"}}>+{e.xp} XP</span>}
             </div>
@@ -582,48 +735,50 @@ function App(){
 
       {/* 체크인 버튼 */}
       <button onClick={function(){setShowCheckin(true);}} style={Object.assign({},S.fixBtn,{})}>
-        ⚡ 오늘의 각성 체크인 ({Object.keys(todayHabits).length}/{DAILY_HABITS.length})
+        ⚡ {L.checkinBtn} ({Object.keys(todayHabits).length}/{DAILY_HABITS.length})
       </button>
 
       {/* 체크인 모달 */}
       {showCheckin&&<div style={S.overlay} onClick={function(){setShowCheckin(false);}}>
         <div style={S.modal} onClick={function(e){e.stopPropagation();}}>
-          <div style={S.mTitle}>⚡ 오늘의 각성 체크인</div>
-          <div style={{fontSize:"0.75rem",color:C.geum3,textAlign:"center",marginBottom:12}}>항목별로 언제든 체크/해제 가능!</div>
+          <div style={S.mTitle}>{L.checkinTitle}</div>
+          <div style={{fontSize:"0.75rem",color:C.geum3,textAlign:"center",marginBottom:12}}>{L.checkinSub}</div>
           {DAILY_HABITS.map(function(h){
             var on=!!todayHabits[h.id];
             var habitXP=Object.values(h.xp).reduce(function(a,b){return a+b;},0);
+            var hLabel=lang==="en"?h.labelEn:h.labelKo;
             return(
               <div key={h.id} style={Object.assign({},S.hItem,{background:on?C.mok+"18":"transparent",borderColor:on?C.mok:"#2a3a2a"})}
                 onClick={function(){toggleHabit(h.id);}}>
                 <span style={{fontSize:"1.2rem"}}>{h.icon}</span>
-                <span style={{flex:1,color:on?C.mok:C.geum,fontSize:"0.88rem"}}>{h.label}</span>
+                <span style={{flex:1,color:on?C.mok:C.geum,fontSize:"0.88rem"}}>{hLabel}</span>
                 <span style={{color:C.mok3,fontFamily:"monospace",fontSize:"0.7rem",marginRight:8}}>+{habitXP}</span>
                 <span style={{fontSize:"1.1rem"}}>{on?"✅":"⬜"}</span>
               </div>
             );
           })}
           <div style={{textAlign:"center",color:C.mok,fontWeight:700,margin:"14px 0 8px",fontFamily:"monospace"}}>
-            오늘 {Object.keys(todayHabits).length}/{DAILY_HABITS.length}개 완료
+            {lang==="en"?Object.keys(todayHabits).length+"/"+DAILY_HABITS.length+L.checkinDone:("오늘 "+Object.keys(todayHabits).length+"/"+DAILY_HABITS.length+L.checkinDone)}
           </div>
-          <Btn onClick={function(){setShowCheckin(false);}} style={S.solid}>닫기</Btn>
+          <Btn onClick={function(){setShowCheckin(false);}} style={S.solid}>{L.checkinClose}</Btn>
         </div>
       </div>}
 
       {/* 논문 모달 */}
       {showPaper&&<div style={S.overlay} onClick={function(){setShowPaper(false);}}>
         <div style={S.modal} onClick={function(e){e.stopPropagation();}}>
-          <div style={S.mTitle}>⚔️ 논문/연구 실적 등록</div>
+          <div style={S.mTitle}>{L.paperTitle}</div>
           <div style={{marginBottom:12}}>
-            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>구분</div>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{L.paperType}</div>
             <div style={{maxHeight:200,overflowY:"auto",display:"flex",flexDirection:"column",gap:5}}>
               {RESEARCH_TYPES.map(function(rt){
                 var on=paperForm.type===rt.id;
+                var rtLabel=lang==="en"?rt.labelEn:rt.labelKo;
                 return(
                   <div key={rt.id} style={Object.assign({},S.hItem,{background:on?C.mok+"18":"transparent",borderColor:on?C.mok:"#2a3a2a"})}
                     onClick={function(){setPaperForm(function(p){return Object.assign({},p,{type:rt.id});});}}>
                     <span>{rt.icon}</span>
-                    <span style={{flex:1,color:C.geum,fontSize:"0.82rem"}}>{rt.label}</span>
+                    <span style={{flex:1,color:C.geum,fontSize:"0.82rem"}}>{rtLabel}</span>
                     <span style={{color:rt.xp>=1000?C.to:C.mok,fontSize:"0.7rem",fontFamily:"monospace"}}>+{rt.xp}</span>
                   </div>
                 );
@@ -631,44 +786,44 @@ function App(){
             </div>
           </div>
           <div style={{marginBottom:10}}>
-            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>논문 제목</div>
-            <Inp value={paperForm.title} onChange={function(e){setPaperForm(function(p){return Object.assign({},p,{title:e.target.value});});}} placeholder="제목"/>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{L.paperName}</div>
+            <Inp value={paperForm.title} onChange={function(e){setPaperForm(function(p){return Object.assign({},p,{title:e.target.value});});}} placeholder={L.paperNamePh}/>
           </div>
           <div style={{marginBottom:10}}>
-            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>저널명</div>
-            <Inp value={paperForm.journal} onChange={function(e){setPaperForm(function(p){return Object.assign({},p,{journal:e.target.value});});}} placeholder="저널/학회명"/>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{L.paperJournal}</div>
+            <Inp value={paperForm.journal} onChange={function(e){setPaperForm(function(p){return Object.assign({},p,{journal:e.target.value});});}} placeholder={L.paperJournalPh}/>
           </div>
           <div style={{marginBottom:10}}>
-            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>연결 프로젝트</div>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{L.paperProject}</div>
             <select value={paperForm.projectId} onChange={function(e){setPaperForm(function(p){return Object.assign({},p,{projectId:e.target.value});});}}
               style={{width:"100%",background:C.su2,border:"1px solid "+C.mok+"44",borderRadius:8,padding:"9px 12px",color:C.geum,fontSize:"0.88rem"}}>
-              <option value="">선택 안함</option>
+              <option value="">{L.paperProjectNone}</option>
               {(state.projects||[]).map(function(p){return <option key={p.id} value={p.id}>{p.title}</option>;})}
             </select>
           </div>
           <div style={{marginBottom:14}}>
-            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>저자 역할</div>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{L.paperRole}</div>
             <div style={{display:"flex",gap:6}}>
-              {["1저자","교신저자","공동저자"].map(function(r){
+              {L.paperRoles.map(function(r){
                 var on=paperForm.role===r;
                 return <Btn key={r} onClick={function(){setPaperForm(function(p){return Object.assign({},p,{role:r});});}}
                   style={{flex:1,padding:"8px 0",fontSize:"0.8rem",border:"1px solid "+(on?C.mok:"#2a3a2a"),background:on?C.mok+"22":"transparent",color:on?C.mok:C.geum2,borderRadius:8}}>{r}</Btn>;
               })}
             </div>
-            <div style={{fontSize:"0.65rem",color:C.geum3,marginTop:4}}>1저자 100% · 교신저자 90% · 공동저자 50%</div>
+            <div style={{fontSize:"0.65rem",color:C.geum3,marginTop:4}}>{L.paperRoleNote}</div>
           </div>
-          <Btn onClick={submitPaper} style={Object.assign({},S.solid,{opacity:paperForm.type&&paperForm.title?1:0.4})}>등록</Btn>
+          <Btn onClick={submitPaper} style={Object.assign({},S.solid,{opacity:paperForm.type&&paperForm.title?1:0.4})}>{L.paperSubmit}</Btn>
         </div>
       </div>}
 
       {/* 프로젝트 모달 */}
       {showProject&&<div style={S.overlay} onClick={function(){setShowProject(false);}}>
         <div style={S.modal} onClick={function(e){e.stopPropagation();}}>
-          <div style={S.mTitle}>{editingPrj?"✏️ 프로젝트 편집":"📚 새 연구 프로젝트"}</div>
+          <div style={S.mTitle}>{editingPrj?L.prjEditTitle:L.prjNewTitle}</div>
           {[
-            {lbl:"프로젝트 제목",key:"title",ph:"예: DJA 논문"},
-            {lbl:"부제/설명",key:"sub",ph:"예: GenAI × 직업불안"},
-            {lbl:"목표 저널",key:"journal",ph:"예: IJPR"},
+            {lbl:L.prjTitle,key:"title",ph:L.prjTitlePh},
+            {lbl:L.prjSub,key:"sub",ph:L.prjSubPh},
+            {lbl:L.prjJournal,key:"journal",ph:L.prjJournalPh},
           ].map(function(f){return(
             <div key={f.key} style={{marginBottom:10}}>
               <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{f.lbl}</div>
@@ -676,7 +831,7 @@ function App(){
             </div>
           );})}
           <div style={{marginBottom:10}}>
-            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>상태</div>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{L.prjStatus}</div>
             <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
               {PROJECT_STATUS.map(function(s){
                 var on=prjForm.status===s,sc=STATUS_COLOR[s]||C.geum2;
@@ -686,20 +841,20 @@ function App(){
             </div>
           </div>
           <div style={{marginBottom:10}}>
-            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>진척도 ({prjForm.progress}%)</div>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{L.prjProgress} ({prjForm.progress}%)</div>
             <input type="range" min="0" max="100" value={prjForm.progress}
               onChange={function(e){var v=parseInt(e.target.value);setPrjForm(function(p){return Object.assign({},p,{progress:v});});}}
               style={{width:"100%",accentColor:C.mok}}/>
           </div>
           <div style={{marginBottom:10}}>
-            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>마감일</div>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{L.prjDeadline}</div>
             <Inp type="date" value={prjForm.deadline} onChange={function(e){var v=e.target.value;setPrjForm(function(p){return Object.assign({},p,{deadline:v});});}}/>
           </div>
           <div style={{marginBottom:14}}>
-            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>메모</div>
-            <Inp value={prjForm.notes} onChange={function(e){var v=e.target.value;setPrjForm(function(p){return Object.assign({},p,{notes:v});});}} placeholder="메모"/>
+            <div style={{fontSize:"0.75rem",color:C.mok,fontWeight:700,marginBottom:5}}>{L.prjNotes}</div>
+            <Inp value={prjForm.notes} onChange={function(e){var v=e.target.value;setPrjForm(function(p){return Object.assign({},p,{notes:v});});}} placeholder={L.prjNotesPh}/>
           </div>
-          <Btn onClick={savePrj} style={Object.assign({},S.solid,{opacity:prjForm.title?1:0.4})}>{editingPrj?"수정 완료":"추가"}</Btn>
+          <Btn onClick={savePrj} style={Object.assign({},S.solid,{opacity:prjForm.title?1:0.4})}>{editingPrj?L.prjSave:L.prjAdd}</Btn>
         </div>
       </div>}
     </div>
