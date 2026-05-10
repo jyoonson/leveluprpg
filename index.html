@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0a0f0a"/>
 <title>LevelupRPG — 손지윤</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -112,7 +111,7 @@ function gradeColor(g){return{F:C.hwa,D:C.geum2,C:C.mok3,B:C.mok,A:C.mok2,S:C.to
 function daysUntil(d){if(!d)return null;return Math.ceil((new Date(d)-new Date())/86400000);}
 function todayStr(){return new Date().toISOString().split("T")[0];}
 function initStatXP(){var o={};STATS.forEach(function(s){o[s.id]=GRADE_XP[s.startGrade];});return o;}
-function defaultState(){return{statXP:initStatXP(),totalXP:0,streak:0,totalDays:0,lastCheckinDate:null,log:[],weightLog:[{date:todayStr(),weight:W.current}],researchLog:[],projects:DEFAULT_PROJECTS,settings:{dDayShort:{label:"단기목표",date:"2026-09-01"},dDayLong:{label:"최종목표",date:"2027-03-01"}}};}
+function defaultState(){return{statXP:initStatXP(),totalXP:0,streak:0,totalDays:0,lastCheckinDate:null,todayHabits:{},log:[],weightLog:[{date:todayStr(),weight:W.current}],researchLog:[],projects:DEFAULT_PROJECTS,settings:{dDayShort:{label:"단기목표",date:"2026-09-01"},dDayLong:{label:"최종목표",date:"2027-03-01"}}};}
 function loadLocal(){try{var r=localStorage.getItem("levelup_v4");if(r)return Object.assign({},defaultState(),JSON.parse(r));}catch(e){}return defaultState();}
 function saveLocal(s){try{localStorage.setItem("levelup_v4",JSON.stringify(s));}catch(e){}}
 
@@ -130,7 +129,6 @@ function App(){
   const [particles,setParticles]=useState([]);
   const [syncStatus,setSyncStatus]=useState("idle");
   const [showCheckin,setShowCheckin]=useState(false);
-  const [checkedHabits,setCheckedHabits]=useState([]);
   const [showPaper,setShowPaper]=useState(false);
   const [paperForm,setPaperForm]=useState({type:"",title:"",journal:"",role:"1저자",projectId:""});
   const [showProject,setShowProject]=useState(false);
@@ -163,7 +161,7 @@ function App(){
   },[state]);
 
   const today=todayStr();
-  const checkedIn=state.lastCheckinDate===today;
+  const todayHabits=state.todayHabits&&state.todayHabits.date===today?state.todayHabits.checked:{};
   const level=Math.floor(state.totalXP/200)+1;
   const wArr=state.weightLog||[];
   const latestW=wArr.length>0?wArr[wArr.length-1].weight:W.current;
@@ -175,25 +173,39 @@ function App(){
     setTimeout(function(){setParticles([]);},2000);
   }
 
-  function doCheckin(){
-    if(checkedIn)return;
-    var xp={};
-    checkedHabits.forEach(function(hid){
-      var h=DAILY_HABITS.find(function(x){return x.id===hid;});
-      if(h)Object.entries(h.xp).forEach(function(kv){xp[kv[0]]=(xp[kv[0]]||0)+kv[1];});
-    });
-    var total=Object.values(xp).reduce(function(a,b){return a+b;},0);
-    var perfect=checkedHabits.length===DAILY_HABITS.length;
+  function toggleHabit(hid){
+    var h=DAILY_HABITS.find(function(x){return x.id===hid;});
+    if(!h)return;
     setState(function(prev){
+      var prevHabits=prev.todayHabits&&prev.todayHabits.date===today?prev.todayHabits.checked:{};
+      var wasChecked=!!prevHabits[hid];
+      var newChecked=Object.assign({},prevHabits);
+      var xpDiff={};
+      if(wasChecked){
+        delete newChecked[hid];
+        Object.entries(h.xp).forEach(function(kv){xpDiff[kv[0]]=-kv[1];});
+      } else {
+        newChecked[hid]=true;
+        Object.entries(h.xp).forEach(function(kv){xpDiff[kv[0]]=kv[1];});
+      }
       var nx=Object.assign({},prev.statXP);
-      Object.entries(xp).forEach(function(kv){nx[kv[0]]=(nx[kv[0]]||0)+kv[1];});
+      Object.entries(xpDiff).forEach(function(kv){nx[kv[0]]=(nx[kv[0]]||0)+kv[1];});
+      var totalDiff=Object.values(xpDiff).reduce(function(a,b){return a+b;},0);
+      var checkedCount=Object.keys(newChecked).length;
+      var isPerfect=checkedCount===DAILY_HABITS.length;
       var yest=new Date(Date.now()-86400000).toISOString().split("T")[0];
-      return Object.assign({},prev,{statXP:nx,totalXP:prev.totalXP+total,lastCheckinDate:today,
-        streak:prev.lastCheckinDate===yest?prev.streak+1:1,totalDays:prev.totalDays+1,
-        log:[{date:today,type:"checkin",habits:checkedHabits.length,xp:total,icon:"✅"}].concat(prev.log.slice(0,99))});
+      var isNewDay=prev.lastCheckinDate!==today;
+      return Object.assign({},prev,{
+        statXP:nx,
+        totalXP:prev.totalXP+totalDiff,
+        todayHabits:{date:today,checked:newChecked},
+        lastCheckinDate:today,
+        streak:isNewDay?(prev.lastCheckinDate===yest?prev.streak+1:1):prev.streak,
+        totalDays:isNewDay?prev.totalDays+1:prev.totalDays,
+        log:isNewDay&&!wasChecked?[{date:today,type:"checkin",habits:checkedCount,xp:totalDiff,icon:"✅"}].concat(prev.log.slice(0,99)):prev.log,
+      });
     });
-    spark();notify("+"+total+" XP "+(perfect?"✨ 완벽한 하루!":"획득!"),C.mok);
-    setShowCheckin(false);setCheckedHabits([]);
+    if(!todayHabits[hid]) spark();
   }
 
   function doEvent(ev){
@@ -555,29 +567,32 @@ function App(){
       </div>
 
       {/* 체크인 버튼 */}
-      <button onClick={function(){if(!checkedIn)setShowCheckin(true);}} style={Object.assign({},S.fixBtn,{opacity:checkedIn?0.5:1})}>
-        {checkedIn?"✅ 오늘 체크인 완료":"⚡ 오늘의 각성 체크인"}
+      <button onClick={function(){setShowCheckin(true);}} style={Object.assign({},S.fixBtn,{})}>
+        ⚡ 오늘의 각성 체크인 ({Object.keys(todayHabits).length}/{DAILY_HABITS.length})
       </button>
 
       {/* 체크인 모달 */}
       {showCheckin&&<div style={S.overlay} onClick={function(){setShowCheckin(false);}}>
         <div style={S.modal} onClick={function(e){e.stopPropagation();}}>
           <div style={S.mTitle}>⚡ 오늘의 각성 체크인</div>
+          <div style={{fontSize:"0.75rem",color:C.geum3,textAlign:"center",marginBottom:12}}>항목별로 언제든 체크/해제 가능!</div>
           {DAILY_HABITS.map(function(h){
-            var on=checkedHabits.indexOf(h.id)>=0;
+            var on=!!todayHabits[h.id];
+            var habitXP=Object.values(h.xp).reduce(function(a,b){return a+b;},0);
             return(
               <div key={h.id} style={Object.assign({},S.hItem,{background:on?C.mok+"18":"transparent",borderColor:on?C.mok:"#2a3a2a"})}
-                onClick={function(){setCheckedHabits(function(p){return on?p.filter(function(x){return x!==h.id;}):[].concat(p,[h.id]);});}}>
-                <span>{h.icon}</span>
-                <span style={{flex:1,color:C.geum,fontSize:"0.88rem"}}>{h.label}</span>
-                <span>{on?"✅":"⬜"}</span>
+                onClick={function(){toggleHabit(h.id);}}>
+                <span style={{fontSize:"1.2rem"}}>{h.icon}</span>
+                <span style={{flex:1,color:on?C.mok:C.geum,fontSize:"0.88rem"}}>{h.label}</span>
+                <span style={{color:C.mok3,fontFamily:"monospace",fontSize:"0.7rem",marginRight:8}}>+{habitXP}</span>
+                <span style={{fontSize:"1.1rem"}}>{on?"✅":"⬜"}</span>
               </div>
             );
           })}
-          <div style={{textAlign:"center",color:C.mok,fontWeight:700,margin:"12px 0 8px",fontFamily:"monospace"}}>
-            예상 XP: +{checkedHabits.reduce(function(acc,hid){var h=DAILY_HABITS.find(function(x){return x.id===hid;});return acc+(h?Object.values(h.xp).reduce(function(a,b){return a+b;},0):0);},0)}
+          <div style={{textAlign:"center",color:C.mok,fontWeight:700,margin:"14px 0 8px",fontFamily:"monospace"}}>
+            오늘 {Object.keys(todayHabits).length}/{DAILY_HABITS.length}개 완료
           </div>
-          <Btn onClick={doCheckin} style={S.solid}>각성 확인</Btn>
+          <Btn onClick={function(){setShowCheckin(false);}} style={S.solid}>닫기</Btn>
         </div>
       </div>}
 
