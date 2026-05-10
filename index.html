@@ -145,20 +145,25 @@ function App(){
 
   useEffect(function(){
     setSyncStatus("syncing");
-    fetch(SHEET_URL).then(function(r){return r.json();}).then(function(data){
-      if(data&&data.totalXP!==undefined&&data.status!=="empty"){
-        setState(Object.assign({},defaultState(),data));
-      }
-      setSyncStatus("ok");
-    }).catch(function(){setSyncStatus("error");});
+    fetch(SHEET_URL+"?action=load")
+      .then(function(r){return r.json();})
+      .then(function(data){
+        if(data&&data.totalXP!==undefined&&data.status!=="empty"){
+          setState(Object.assign({},defaultState(),data));
+        }
+        setSyncStatus("ok");
+      }).catch(function(){setSyncStatus("error");});
   },[]);
 
   useEffect(function(){
     if(syncStatus==="syncing")return;
     var t=setTimeout(function(){
       setSyncStatus("syncing");
-      fetch(SHEET_URL,{method:"POST",body:JSON.stringify(state),headers:{"Content-Type":"application/json"}})
-        .then(function(r){return r.json();}).then(function(){setSyncStatus("ok");}).catch(function(){setSyncStatus("error");});
+      var url=SHEET_URL+"?action=save&data="+encodeURIComponent(JSON.stringify(state));
+      fetch(url)
+        .then(function(r){return r.json();})
+        .then(function(){setSyncStatus("ok");})
+        .catch(function(){setSyncStatus("error");});
     },1500);
     return function(){clearTimeout(t);};
   },[state]);
