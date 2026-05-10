@@ -105,7 +105,7 @@ const DEFAULT_PROJECTS=[
   {id:"dpm",title:"DPM 논문",sub:"디자인 관여도 × NPD성과",journal:"JMTM",status:"R&R",progress:40,deadline:"",notes:"이론적 기여 보강 필요",papers:[]},
 ];
 
-const SHEET_URL="https://script.google.com/macros/s/AKfycbyVsN5jT-62obLU945JLKaGYxcLOzfp7DWPmHprPHakCBdD0AKySdgJhZbPiNwqAZ-M2A/exec";
+const SHEET_URL="https://script.google.com/macros/s/AKfycbzHEQayswiNH6MHj-AVxDpyr3fWF2wQnlWbmH6nOt3OpIxGwR3vbpUtuF2Q9vuKJ4xX8w/exec";
 
 function getTitle(lv){const t=[...TITLES].reverse().find(function(t){return lv>=t.minLevel;});return t?t.title:"시간강사";}
 function gradeFromXP(xp){var g="F";for(var i=0;i<GRADES.length;i++){if(xp>=GRADE_XP[GRADES[i]])g=GRADES[i];}return g;}
