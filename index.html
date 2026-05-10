@@ -44,12 +44,12 @@ const GRADE_XP={F:0,D:500,C:1500,B:3000,A:5500,S:9000,SS:14000,SSS:20000};
 const NEXT_XP={F:500,D:1500,C:3000,B:5500,A:9000,S:14000,SS:20000,SSS:99999};
 
 const STATS=[
-  {id:"research",  icon:"⚔️",label:"연구실적", sub:"SSCI·SCIE·KCI",       color:C.mok, startGrade:"D"},
-  {id:"methodology",icon:"🔬",label:"연구역량", sub:"방법론·자격증·빅데이터",color:C.mok3,startGrade:"C"},
-  {id:"external",  icon:"🏛️",label:"대외실적", sub:"산학·해외연계·학회",    color:C.to,  startGrade:"F"},
-  {id:"teaching",  icon:"🎓",label:"티칭",     sub:"강의평가·강의다양성",    color:C.geum,startGrade:"A"},
-  {id:"presence",  icon:"💎",label:"프레젠스", sub:"외모·체력·자신감",       color:C.mok2,startGrade:"C"},
-  {id:"network",   icon:"🤝",label:"네트워크", sub:"인맥·추천서·학회활동",   color:C.to2, startGrade:"D"},
+  {id:"research",  icon:"⚔️",label:"연구실적", sub:"SSCI·SCIE·KCI",       color:C.mok, startGrade:"D", tab:"research"},
+  {id:"methodology",icon:"🔬",label:"연구역량", sub:"방법론·자격증·빅데이터",color:C.mok3,startGrade:"C", tab:"events"},
+  {id:"external",  icon:"🏛️",label:"대외실적", sub:"산학·해외연계·학회",    color:C.to,  startGrade:"F", tab:"events"},
+  {id:"teaching",  icon:"🎓",label:"티칭",     sub:"강의평가·강의다양성",    color:C.geum,startGrade:"A", tab:"events"},
+  {id:"presence",  icon:"💎",label:"프레젠스", sub:"외모·체력·자신감",       color:C.mok2,startGrade:"C", tab:"body"},
+  {id:"network",   icon:"🤝",label:"네트워크", sub:"인맥·추천서·학회활동",   color:C.to2, startGrade:"D", tab:"events"},
 ];
 
 const RESEARCH_TYPES=[
@@ -360,8 +360,13 @@ function App(){
         {tab==="main"&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
           {STATS.map(function(stat){
             var xp=state.statXP[stat.id]||0,g=gradeFromXP(xp),pct=gradeProgress(xp),gc=gradeColor(g);
+            var tabLabel={research:"연구",events:"실적",body:"체중"}[stat.tab]||stat.tab;
             return(
-              <div key={stat.id} style={Object.assign({},S.card,{borderColor:stat.color+"44"})}>
+              <div key={stat.id}
+                onClick={function(){setTab(stat.tab);}}
+                onMouseEnter={function(e){e.currentTarget.style.borderColor=stat.color+"99";e.currentTarget.style.background=C.su3;}}
+                onMouseLeave={function(e){e.currentTarget.style.borderColor=stat.color+"44";e.currentTarget.style.background=C.su2;}}
+                style={Object.assign({},S.card,{borderColor:stat.color+"44",cursor:"pointer",transition:"border-color 0.2s,background 0.2s"})}>
                 <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
                   <span style={{fontSize:"1.3rem"}}>{stat.icon}</span>
                   <div style={{flex:1}}>
@@ -369,6 +374,7 @@ function App(){
                     <div style={{fontSize:"0.65rem",color:C.geum3,marginTop:1}}>{stat.sub}</div>
                   </div>
                   <div style={Object.assign({},S.grade,{color:gc,borderColor:gc})}>{g}</div>
+                  <span style={{fontSize:"0.6rem",color:stat.color,fontFamily:"monospace",opacity:0.7}}>{"→ "+tabLabel}</span>
                 </div>
                 <div style={S.bar}><div style={Object.assign({},S.fill,{width:pct+"%",background:"linear-gradient(90deg,"+stat.color+"77,"+stat.color+")"})}/></div>
                 <div style={{fontSize:"0.6rem",color:C.geum3,marginTop:4,fontFamily:"monospace"}}>{xp.toLocaleString()} / {NEXT_XP[g].toLocaleString()} XP</div>
