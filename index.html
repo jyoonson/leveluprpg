@@ -297,6 +297,12 @@ function App(){
   }
 
   useEffect(function(){saveLocal(state);},[state]);
+  useEffect(function(){
+  var now=new Date();
+  var msUntilMidnight=(new Date(now.getFullYear(),now.getMonth(),now.getDate()+1)-now);
+  var t=setTimeout(function(){window.location.reload();},msUntilMidnight);
+  return function(){clearTimeout(t);};
+},[]);
 
   useEffect(function(){
     setSyncStatus("syncing");
