@@ -252,7 +252,11 @@ function gradeFromXP(xp){var g="F";for(var i=0;i<GRADES.length;i++){if(xp>=GRADE
 function gradeProgress(xp){var g=gradeFromXP(xp);return Math.min(((xp-GRADE_XP[g])/(NEXT_XP[g]-GRADE_XP[g]))*100,100);}
 function gradeColor(g){return{F:"#ef4444",D:"#888888",C:"#86efac",B:"#4ade80",A:"#22c55e",S:"#fbbf24",SS:"#fcd34d",SSS:"#fff"}[g]||"#888888";}
 function daysUntil(d){if(!d)return null;return Math.ceil((new Date(d)-new Date())/86400000);}
-function todayStr(){return new Date().toISOString().split("T")[0];}
+function todayStr(){
+  var d=new Date();
+  d.setHours(d.getHours()+9);
+  return d.toISOString().split("T")[0];
+}
 function initStatXP(){var o={};STATS.forEach(function(s){o[s.id]=GRADE_XP[s.startGrade];});return o;}
 function defaultState(){return{statXP:initStatXP(),totalXP:0,streak:0,totalDays:0,lastCheckinDate:null,todayHabits:{},log:[],weightLog:[{date:todayStr(),weight:W.current}],researchLog:[],projects:DEFAULT_PROJECTS,settings:{dDayShort:{label:"단기목표",date:"2026-09-01"},dDayLong:{label:"최종목표",date:"2027-03-01"}}};}
 function loadLocal(){try{var r=localStorage.getItem("levelup_v4");if(r)return Object.assign({},defaultState(),JSON.parse(r));}catch(e){}return defaultState();}
