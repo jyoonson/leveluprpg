@@ -171,12 +171,11 @@ const LANG={
 };
 
 const STATS=[
-  {id:"research",  icon:"⚔️",labelKo:"연구실적", labelEn:"Research",    subKo:"SSCI·SCIE·KCI",            subEn:"SSCI·SCIE·KCI",           color:"#4ade80", startGrade:"D", tab:"research"},
-  {id:"methodology",icon:"🔬",labelKo:"연구역량", labelEn:"Methodology", subKo:"방법론·자격증·빅데이터",    subEn:"Methods·Certs·Big Data",  color:"#86efac", startGrade:"C", tab:"events"},
-  {id:"external",  icon:"🏛️",labelKo:"대외실적", labelEn:"External",    subKo:"산학·해외연계·학회",        subEn:"Industry·Intl·Conference",color:"#fbbf24", startGrade:"F", tab:"events"},
-  {id:"teaching",  icon:"🎓",labelKo:"티칭",     labelEn:"Teaching",    subKo:"강의평가·강의다양성",        subEn:"Evals·Course Diversity",  color:"#f0f0f0", startGrade:"A", tab:"events"},
-  {id:"presence",  icon:"💎",labelKo:"프레젠스", labelEn:"Presence",    subKo:"외모·체력·자신감",          subEn:"Appearance·Fitness·Confidence",color:"#22c55e",startGrade:"C", tab:"body"},
-  {id:"network",   icon:"🤝",labelKo:"네트워크", labelEn:"Network",     subKo:"인맥·추천서·학회활동",      subEn:"Connections·Letters·Activities",color:"#fcd34d",startGrade:"D", tab:"events"},
+  {id:"research", icon:"⚔️",labelKo:"연구",     labelEn:"Research", subKo:"논문·방법론·자격증",       subEn:"Papers·Methods·Certs",         color:"#4ade80", startGrade:"D", tab:"research"},
+  {id:"teaching", icon:"🎓",labelKo:"티칭",     labelEn:"Teaching", subKo:"강의평가·강의다양성",       subEn:"Evals·Course Diversity",       color:"#f0f0f0", startGrade:"A", tab:"events"},
+  {id:"activity", icon:"🏛️",labelKo:"임용활동", labelEn:"Activity", subKo:"산학·학회·인맥·추천서",    subEn:"Industry·Conference·Network",  color:"#fbbf24", startGrade:"F", tab:"events"},
+  {id:"presence", icon:"💎",labelKo:"프레젠스", labelEn:"Presence", subKo:"외모·체력·자신감",          subEn:"Appearance·Fitness·Confidence",color:"#22c55e", startGrade:"C", tab:"body"},
+  {id:"finance",  icon:"💰",labelKo:"재정",     labelEn:"Finance",  subKo:"저금·투자·지출관리",        subEn:"Saving·Investment·Budget",     color:"#a78bfa", startGrade:"F", tab:"events"},
 ];
 
 const RESEARCH_TYPES=[
@@ -202,33 +201,38 @@ const STATUS_COLOR={
 };
 
 const DAILY_HABITS=[
-  {id:"wake",    labelKo:"6시 기상",           labelEn:"Wake by 6am",         icon:"🌅",xp:{presence:15}},
-  {id:"fast",    labelKo:"8시 이후 금식",       labelEn:"No eating after 8pm", icon:"🚫",xp:{presence:20}},
-  {id:"water",   labelKo:"물 2L 이상",          labelEn:"Drink 2L water",      icon:"💧",xp:{presence:15}},
-  {id:"sleep",   labelKo:"11시 이전 취침",       labelEn:"Sleep by 11pm",       icon:"🌙",xp:{presence:15}},
-  {id:"meal",    labelKo:"도시락/식사시간 준수", labelEn:"Stick to meal plan",  icon:"🍱",xp:{presence:10}},
-  {id:"desk",    labelKo:"책상 앞 앉기",         labelEn:"Sit at desk",         icon:"🪑",xp:{research:10}},
-  {id:"email", labelKo:"이메일 확인/처리", labelEn:"Check & clear email", icon:"📧", xp:{network:10}},
-  {id:"paper",   labelKo:"논문 5페이지 읽기",    labelEn:"Read 5 pages",        icon:"📄",xp:{research:30,methodology:10}},
-  {id:"write",   labelKo:"100단어 이상 쓰기",    labelEn:"Write 100+ words",    icon:"✍️",xp:{research:40}},
-  {id:"exercise",labelKo:"운동",                labelEn:"Exercise",            icon:"🏃",xp:{presence:25}},
+  {id:"wake",    labelKo:"6시 기상",            labelEn:"Wake by 6am",         icon:"🌅",xp:{presence:15}},
+  {id:"fast",    labelKo:"8시 이후 금식",        labelEn:"No eating after 8pm", icon:"🚫",xp:{presence:20}},
+  {id:"water",   labelKo:"물 2L 이상",           labelEn:"Drink 2L water",      icon:"💧",xp:{presence:15}},
+  {id:"sleep",   labelKo:"11시 이전 취침",        labelEn:"Sleep by 11pm",       icon:"🌙",xp:{presence:15}},
+  {id:"meal",    labelKo:"도시락/식사시간 준수",  labelEn:"Stick to meal plan",  icon:"🍱",xp:{presence:10}},
+  {id:"desk",    labelKo:"책상 앞 앉기",          labelEn:"Sit at desk",         icon:"🪑",xp:{research:10}},
+  {id:"email",   labelKo:"이메일 확인/처리",      labelEn:"Check & clear email", icon:"📧",xp:{activity:10}},
+  {id:"paper",   labelKo:"논문 5페이지 읽기",     labelEn:"Read 5 pages",        icon:"📄",xp:{research:40}},
+  {id:"write",   labelKo:"100단어 이상 쓰기",     labelEn:"Write 100+ words",    icon:"✍️",xp:{research:40}},
+  {id:"exercise",labelKo:"운동",                 labelEn:"Exercise",            icon:"🏃",xp:{presence:25}},
+  {id:"saving",  labelKo:"저금/투자 실행",        labelEn:"Save or invest",      icon:"💰",xp:{finance:20}},
+  {id:"stock",   labelKo:"주식/포트폴리오 확인",  labelEn:"Check portfolio",     icon:"📈",xp:{finance:10}},
+  {id:"budget",  labelKo:"지출 기록",             labelEn:"Log expenses",        icon:"🧾",xp:{finance:10}},
 ];
 
 const EVENTS=[
-{id:"paper_submit",  labelKo:"논문 투고",          labelEn:"Paper Submission",     icon:"📮",xp:{research:100}},
-{id:"paper_revision",labelKo:"R&R 수정 제출",      labelEn:"Revision Submitted",   icon:"📝",xp:{research:80}},
-{id:"review",        labelKo:"논문 리뷰 완료",     labelEn:"Peer Review Done",     icon:"🔍",xp:{network:60,methodology:40}},
-{id:"grant",         labelKo:"연구비 신청",         labelEn:"Grant Application",    icon:"💰",xp:{external:120}},
-  {id:"project",    labelKo:"산학 프로젝트 수주",  labelEn:"Industry Project",      icon:"💼",xp:{external:300}},
-  {id:"certificate",labelKo:"자격증 취득",          labelEn:"Certification",         icon:"📜",xp:{methodology:400}},
-  {id:"grooming",   labelKo:"외모관리(왁싱/피부)",  labelEn:"Grooming/Skincare",     icon:"💅",xp:{presence:50}},
-  {id:"health",     labelKo:"병원/건강검진",         labelEn:"Medical Checkup",       icon:"🏥",xp:{presence:40}},
-  {id:"application",labelKo:"임용 지원서 제출",      labelEn:"Faculty Application",   icon:"📋",xp:{research:50,network:50}},
-  {id:"interview",  labelKo:"면접 참가",             labelEn:"Interview",             icon:"🎯",xp:{network:200,teaching:100}},
-  {id:"collab",     labelKo:"해외 연구자 컨택",      labelEn:"Intl Researcher Contact",icon:"🌐",xp:{external:150,network:100}},
-  {id:"method",     labelKo:"방법론 스터디",          labelEn:"Methodology Study",     icon:"📊",xp:{methodology:100}},
-  {id:"overseas",   labelKo:"해외학회 참가",          labelEn:"Overseas Conference",   icon:"✈️",xp:{external:300,network:150}},
-  {id:"domestic_conf", labelKo:"국내학회 발표",    labelEn:"Domestic Conference",  icon:"🎤",xp:{external:150,network:50}},
+  {id:"paper_submit",   labelKo:"논문 투고",           labelEn:"Paper Submission",      icon:"📮",xp:{research:100}},
+  {id:"paper_revision", labelKo:"R&R 수정 제출",       labelEn:"Revision Submitted",    icon:"📝",xp:{research:80}},
+  {id:"domestic_conf",  labelKo:"국내학회 발표",        labelEn:"Domestic Conference",   icon:"🎤",xp:{activity:150,research:50}},
+  {id:"overseas",       labelKo:"해외학회 참가",        labelEn:"Overseas Conference",   icon:"✈️",xp:{activity:250,research:50}},
+  {id:"review",         labelKo:"논문 리뷰 완료",       labelEn:"Peer Review Done",      icon:"🔍",xp:{research:60}},
+  {id:"certificate",    labelKo:"자격증 취득",          labelEn:"Certification",         icon:"📜",xp:{research:200}},
+  {id:"grant",          labelKo:"연구비 신청",          labelEn:"Grant Application",     icon:"💡",xp:{activity:120}},
+  {id:"project",        labelKo:"산학 프로젝트 수주",   labelEn:"Industry Project",      icon:"💼",xp:{activity:300}},
+  {id:"application",    labelKo:"임용 지원서 제출",     labelEn:"Faculty Application",   icon:"📋",xp:{activity:100}},
+  {id:"interview",      labelKo:"면접 참가",            labelEn:"Interview",             icon:"🎯",xp:{activity:200,teaching:100}},
+  {id:"collab",         labelKo:"해외 연구자 컨택",     labelEn:"Intl Researcher Contact",icon:"🌐",xp:{activity:150}},
+  {id:"method",         labelKo:"방법론 스터디",         labelEn:"Methodology Study",     icon:"📊",xp:{research:100}},
+  {id:"grooming",       labelKo:"외모관리(왁싱/피부)",  labelEn:"Grooming/Skincare",     icon:"💅",xp:{presence:50}},
+  {id:"health",         labelKo:"병원/건강검진",         labelEn:"Medical Checkup",       icon:"🏥",xp:{presence:40}},
+  {id:"income",         labelKo:"추가 수입 발생",        labelEn:"Extra income",          icon:"💵",xp:{finance:100}},
+  {id:"invest",         labelKo:"투자 실행",             labelEn:"Made investment",       icon:"📊",xp:{finance:80}},
 ];
 
 const W={current:61.7,z1:57,z2:52,z3:47};
@@ -259,7 +263,24 @@ function todayStr(){
 }
 function initStatXP(){var o={};STATS.forEach(function(s){o[s.id]=GRADE_XP[s.startGrade];});return o;}
 function defaultState(){return{statXP:initStatXP(),totalXP:0,streak:0,totalDays:0,lastCheckinDate:null,todayHabits:{},log:[],weightLog:[{date:todayStr(),weight:W.current}],researchLog:[],projects:DEFAULT_PROJECTS,settings:{dDayShort:{label:"단기목표",date:"2026-09-01"},dDayLong:{label:"최종목표",date:"2027-03-01"}}};}
-function loadLocal(){try{var r=localStorage.getItem("levelup_v4");if(r)return Object.assign({},defaultState(),JSON.parse(r));}catch(e){}return defaultState();}
+function loadLocal(){
+  try{
+    var r=localStorage.getItem("levelup_v4");
+    if(r){
+      var parsed=JSON.parse(r);
+      // 구 스탯 키 마이그레이션: methodology→research, external+network→activity
+      if(parsed.statXP){
+        var sx=parsed.statXP;
+        if(sx.methodology!==undefined){sx.research=(sx.research||0)+sx.methodology;delete sx.methodology;}
+        if(sx.external!==undefined){sx.activity=(sx.activity||0)+sx.external;delete sx.external;}
+        if(sx.network!==undefined){sx.activity=(sx.activity||0)+sx.network;delete sx.network;}
+        if(sx.finance===undefined){sx.finance=0;}
+      }
+      return Object.assign({},defaultState(),parsed);
+    }
+  }catch(e){}
+  return defaultState();
+}
 function saveLocal(s){try{localStorage.setItem("levelup_v4",JSON.stringify(s));}catch(e){}}
 function loadLang(){try{return localStorage.getItem("levelup_lang")||"en";}catch(e){return"en";}}
 function saveLang(l){try{localStorage.setItem("levelup_lang",l);}catch(e){}}
